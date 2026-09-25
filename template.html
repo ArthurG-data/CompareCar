@@ -1,0 +1,2239 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Montréal SUV Price Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --page:#eef0f3;
+  --surface:#fbfbfc;
+  --surface-2:#f4f5f8;
+  --ink:#0e1013;
+  --ink-2:#4f5560;
+  --muted:#7d848f;
+  --grid:#e3e5ea;
+  --axis:#c6cad2;
+  --hair:rgba(14,16,19,.10);
+  --hair-2:rgba(14,16,19,.055);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#8e56d3;
+  --good:#0a7d0a; --bad:#c0322f;
+  --shadow:0 1px 2px rgba(14,16,19,.05), 0 8px 24px -14px rgba(14,16,19,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --page:#0b0c0d;
+    --surface:#17181a;
+    --surface-2:#1f2124;
+    --ink:#ffffff;
+    --ink-2:#c0c4cc;
+    --muted:#8b929c;
+    --grid:#282a2e;
+    --axis:#3a3d43;
+    --hair:rgba(255,255,255,.11);
+    --hair-2:rgba(255,255,255,.06);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#a07ae6;
+    --good:#0ca30c; --bad:#e26c6a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#0b0c0d;
+  --surface:#17181a;
+  --surface-2:#1f2124;
+  --ink:#ffffff;
+  --ink-2:#c0c4cc;
+  --muted:#8b929c;
+  --grid:#282a2e;
+  --axis:#3a3d43;
+  --hair:rgba(255,255,255,.11);
+  --hair-2:rgba(255,255,255,.06);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#a07ae6;
+  --good:#0ca30c; --bad:#e26c6a;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  background:var(--page);
+  color:var(--ink);
+  font-family:"Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 22px 64px;display:flex;flex-direction:column;gap:18px}
+
+.eyebrow{
+  font-family:"Barlow Condensed", "Barlow", system-ui, sans-serif;
+  text-transform:uppercase; letter-spacing:.13em; font-weight:600;
+  font-size:12.5px; color:var(--muted);
+}
+h1{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  font-weight:700; font-size:clamp(30px,4.6vw,46px); line-height:1.03;
+  letter-spacing:-.005em; margin:6px 0 8px; text-wrap:balance;
+}
+.lede{color:var(--ink-2);max-width:66ch;margin:0}
+header .rule{height:2px;background:var(--ink);width:52px;margin-top:16px;border-radius:2px}
+
+.card{
+  background:var(--surface); border:1px solid var(--hair);
+  border-radius:10px; box-shadow:var(--shadow); padding:16px 18px;
+}
+.card > h2{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  text-transform:uppercase; letter-spacing:.1em; font-weight:600;
+  font-size:13px; color:var(--ink-2); margin:0 0 2px;
+}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+.cardhead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+
+/* ---------- filters ---------- */
+.filters{padding:12px 18px}
+.filterrow{display:flex;gap:16px 20px;flex-wrap:wrap;align-items:flex-start}
+.fgroup{display:flex;flex-direction:column;gap:6px;min-width:0}
+.flabel{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.11em;font-weight:600;
+  font-size:11.5px;color:var(--muted);
+}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  font:inherit;font-size:13.5px;font-weight:500;
+  padding:5px 11px;border-radius:999px;cursor:pointer;
+  background:var(--surface-2); color:var(--ink-2);
+  border:1px solid var(--hair); display:inline-flex;align-items:center;gap:7px;
+  transition:background .12s, color .12s, border-color .12s;
+}
+.chip:hover{background:var(--hair-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.chip[aria-pressed="false"] .dot{opacity:.35}
+.chip:focus-visible,.tbtn:focus-visible,.linkbtn:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+
+.dual{width:150px;padding-top:2px}
+.dualtop{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;margin-bottom:5px}
+.slider{position:relative;height:22px}
+.slider.solo::before{content:"";position:absolute;top:9px;left:0;right:0;height:4px;background:var(--grid);border-radius:2px}
+.slider.solo input[type=range]{pointer-events:auto}
+.slider .track{position:absolute;top:9px;left:0;right:0;height:4px;background:var(--grid);border-radius:2px}
+.slider .fill{position:absolute;top:9px;height:4px;background:var(--ink);border-radius:2px}
+.slider input[type=range]{
+  position:absolute;top:0;left:0;width:100%;height:22px;margin:0;
+  -webkit-appearance:none;appearance:none;background:none;pointer-events:none;
+}
+.slider input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;pointer-events:auto;width:15px;height:15px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--ink);cursor:grab;box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+.slider input[type=range]::-moz-range-thumb{
+  pointer-events:auto;width:13px;height:13px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--ink);cursor:grab;
+}
+.slider input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--s1);outline-offset:2px}
+
+.tbtn{
+  font:inherit;font-size:13px;font-weight:500;padding:5px 10px;border-radius:7px;cursor:pointer;
+  background:transparent;border:1px solid var(--hair);color:var(--ink-2);
+}
+.tbtn:hover{background:var(--hair-2)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.seg{display:inline-flex;gap:4px;background:var(--surface-2);padding:3px;border-radius:9px;border:1px solid var(--hair)}
+.seg .tbtn{border:none}
+
+/* ---------- stat tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:13px 15px;box-shadow:var(--shadow)}
+.tile .k{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  text-transform:uppercase;letter-spacing:.11em;font-weight:600;font-size:11.5px;color:var(--muted);
+}
+.tile .v{font-size:27px;font-weight:600;line-height:1.15;margin-top:3px;letter-spacing:-.015em}
+.tile .n{font-size:12.5px;color:var(--muted);margin-top:1px}
+
+/* ---------- layout ---------- */
+.split{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1040px){.split{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- charts ---------- */
+.chartbox{position:relative}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.gridline{stroke:var(--grid);stroke-width:1}
+.axisline{stroke:var(--axis);stroke-width:1}
+.tick{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  font-size:11.5px;fill:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+.axistitle{
+  font-family:"Barlow Condensed","Barlow",system-ui,sans-serif;
+  font-size:11.5px;fill:var(--muted);text-transform:uppercase;letter-spacing:.11em;
+}
+.dlabel{font-size:12px;font-weight:600;font-family:"Barlow",system-ui,sans-serif}
+.bar{cursor:pointer}
+.bar rect.seg{stroke:var(--surface);stroke-width:2}
+.bar.sel rect.hit{stroke:var(--ink);stroke-width:2;fill:var(--hair-2)}
+.bar:hover rect.hit{fill:var(--hair-2)}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+.legend .li{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2)}
+.legend .sw{width:11px;height:11px;border-radius:3px;flex:none}
+.legend .swl{width:14px;height:2px;border-radius:2px;flex:none}
+
+.tip{
+  position:absolute;pointer-events:none;opacity:0;transition:opacity .1s;
+  background:var(--surface);border:1px solid var(--hair);border-radius:8px;
+  padding:8px 10px;font-size:12.5px;box-shadow:var(--shadow);z-index:20;min-width:130px;
+}
+.tip .th{font-family:"Barlow Condensed","Barlow",sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--muted);margin-bottom:5px}
+.tip .tr{display:flex;align-items:center;gap:7px;justify-content:space-between;margin-top:3px}
+.tip .tl{display:flex;align-items:center;gap:6px;color:var(--ink-2);font-size:12px}
+.tip .tk{width:12px;height:2px;border-radius:2px;flex:none}
+.tip .tv{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ---------- listing panel ---------- */
+.listhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.listwrap{max-height:560px;overflow-y:auto;margin:0 -6px;padding:0 6px}
+.row{display:block;color:inherit;padding:10px 4px;border-bottom:1px solid var(--hair-2)}
+.row:hover{background:var(--hair-2)}
+.r1{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.rname{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:7px;min-width:0}
+.rname .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.rname a.t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit;text-decoration:none}
+.rname a.t:hover{text-decoration:underline}
+.rname a.t:focus-visible{outline:2px solid var(--s1);outline-offset:2px;border-radius:3px}
+.rright{display:flex;align-items:center;gap:6px;flex:none}
+.rprice{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.save{font:inherit;font-size:17px;line-height:1;width:30px;height:30px;border-radius:7px;cursor:pointer;
+  background:transparent;border:1px solid transparent;color:var(--muted);padding:0}
+.save:hover{background:var(--hair);color:var(--ink)}
+.save[aria-pressed="true"]{color:var(--s4)}
+.save:focus-visible{outline:2px solid var(--s1);outline-offset:1px}
+.save:disabled{opacity:.35;cursor:default}
+.r2{display:flex;gap:9px;flex-wrap:wrap;color:var(--muted);font-size:12.5px;margin-top:2px;align-items:center}
+.r2 .sep{opacity:.45}
+.delta{font-size:11.5px;font-weight:600;padding:1px 6px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.delta.under{color:var(--good);background:color-mix(in srgb,var(--good) 13%,transparent)}
+.delta.over{color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
+.delta.par{color:var(--muted);background:var(--hair-2)}
+.delta .pct{font-weight:500;opacity:.75;margin-left:3px}
+.delta.stale{color:var(--muted);background:var(--hair-2);font-weight:500}
+.empty{color:var(--muted);font-size:13.5px;padding:26px 4px;text-align:center}
+
+/* ---------- shortlist ---------- */
+.slmeta{color:var(--muted);font-size:12px;margin-top:4px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.linkbtn{font:inherit;font-size:12px;background:none;border:none;color:var(--ink-2);cursor:pointer;padding:0;text-decoration:underline}
+.linkbtn:hover{color:var(--ink)}
+.slnote{color:var(--bad);font-size:13px;margin:0 0 8px}
+
+/* ---------- sticky filter bar ---------- */
+#stickybar{position:sticky;top:0;z-index:30;background:var(--surface);border:1px solid var(--hair);
+  border-radius:9px;box-shadow:var(--shadow);padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  margin:-6px 0}
+#stickybar .sum{flex:1 1 200px;min-width:0;font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stickybar .sum strong{color:var(--ink);font-weight:600}
+#stickybar .acts{display:flex;gap:6px;flex:none}
+/* ---------- data refresh ---------- */
+.refreshbtn{font:inherit;text-transform:none;letter-spacing:0;font-size:12.5px;margin-left:8px;color:var(--s1)}
+.refreshbox{background:var(--surface);border:1px solid var(--hair);border-radius:9px;padding:10px 14px;margin-top:12px;max-width:66ch}
+.refreshbox .rtop{display:flex;align-items:center;gap:9px;font-size:13.5px;flex-wrap:wrap}
+.refreshbox .n{color:var(--muted);font-size:12.5px}
+.refreshbox pre{margin:8px 0 0;font-size:11.5px;color:var(--ink-2);white-space:pre-wrap;max-height:160px;overflow:auto;
+  font-family:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono","Barlow",system-ui,sans-serif}
+.refreshbox.done .spin,.refreshbox.fail .spin{display:none}
+.refreshbox.fail strong{color:var(--bad)}
+.refreshbox.done strong{color:var(--good)}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--hair);border-top-color:var(--s1);animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.advtoggle{display:flex;justify-content:center}
+#advanced{display:flex;flex-direction:column;gap:18px}
+.copied{color:var(--good)!important;border-color:var(--good)!important}
+
+/* ---------- small multiples ---------- */
+.sm{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.smcell{position:relative;min-width:0}
+.smtitle{display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;margin-bottom:2px}
+.smtitle .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.smtitle .n{color:var(--muted);font-weight:400;font-size:12.5px}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;margin-top:6px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--hair-2);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{
+  font-family:"Barlow Condensed","Barlow",sans-serif;text-transform:uppercase;
+  letter-spacing:.09em;font-size:11.5px;color:var(--muted);font-weight:600;
+  border-bottom:1px solid var(--hair);
+}
+tbody tr:hover{background:var(--hair-2)}
+caption{caption-side:top;text-align:left;font-size:12.5px;color:var(--muted);padding-bottom:8px}
+
+footer{color:var(--muted);font-size:12.5px;line-height:1.65;border-top:1px solid var(--hair);padding-top:16px}
+footer a{color:var(--ink-2)}
+.note{background:var(--surface-2);border-left:2px solid var(--axis);padding:10px 13px;border-radius:0 7px 7px 0;font-size:13px;color:var(--ink-2)}
+
+/* ---------- model sections ---------- */
+.callouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0 4px}
+.callout{background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;padding:12px 14px}
+.callout .k{font-family:"Barlow Condensed","Barlow",sans-serif;text-transform:uppercase;letter-spacing:.11em;font-weight:600;font-size:11.5px;color:var(--muted)}
+.callout .v{font-size:25px;font-weight:600;line-height:1.15;margin-top:2px;letter-spacing:-.015em}
+.callout .v.neg{color:var(--bad)}
+.callout .n{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.pred{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:center}
+@media (max-width:820px){.pred{grid-template-columns:minmax(0,1fr)}}
+.predgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:11px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-family:"Barlow Condensed","Barlow",sans-serif;text-transform:uppercase;letter-spacing:.11em;font-weight:600;font-size:11px;color:var(--muted)}
+.field select,.field input[type=number]{
+  font:inherit;font-size:13.5px;padding:6px 8px;border-radius:7px;
+  background:var(--surface);color:var(--ink);border:1px solid var(--hair);width:100%;
+}
+.field select:focus-visible,.field input:focus-visible{outline:2px solid var(--s1);outline-offset:1px}
+.predout{background:var(--surface-2);border:1px solid var(--hair);border-radius:10px;padding:18px 20px;text-align:center}
+.predout .k{font-family:"Barlow Condensed","Barlow",sans-serif;text-transform:uppercase;letter-spacing:.11em;font-weight:600;font-size:11.5px;color:var(--muted)}
+.predout .big{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1.05;margin:4px 0 2px}
+.predout .rng{font-size:13px;color:var(--ink-2)}
+.predout .n{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+.heatwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:16px}
+.heatcell{position:relative;min-width:0}
+.ramp{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.ramp .bar{display:flex;height:10px;border-radius:3px;overflow:hidden;width:150px}
+.ramp .bar span{flex:1}
+.best{font-size:13px;color:var(--ink-2);margin-top:6px}
+.best strong{color:var(--ink)}
+:root{--r0:#cde2fb;--r1:#9ec5f4;--r2:#6da7ec;--r3:#3987e5;--r4:#256abf;--r5:#184f95;--r6:#0d366b}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--r0:#104281;--r1:#184f95;--r2:#256abf;--r3:#3987e5;--r4:#6da7ec;--r5:#9ec5f4;--r6:#cde2fb}}
+:root[data-theme="dark"]{--r0:#104281;--r1:#184f95;--r2:#256abf;--r3:#3987e5;--r4:#6da7ec;--r5:#9ec5f4;--r6:#cde2fb}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<div id="stickybar" hidden>
+  <div class="sum" id="stickySum"></div>
+  <div class="acts">
+    <button class="tbtn" type="button" id="stickyEdit">Edit filters</button>
+    <button class="tbtn" type="button" id="stickyCopy">Copy link</button>
+    <button class="tbtn" type="button" id="stickyReset">Reset</button>
+  </div>
+</div>
+
+<header>
+  <div class="eyebrow">AutoTrader.ca &middot; <span id="metaLoc"></span> &middot; <span id="metaN"></span> listings &middot; data from <span id="metaDate"></span>
+    <button class="linkbtn refreshbtn" type="button" id="refreshBtn" hidden>Refresh data</button></div>
+  <div class="refreshbox" id="refreshBox" hidden>
+    <div class="rtop"><span class="spin" aria-hidden="true"></span><strong id="refreshStep"></strong><span class="n" id="refreshNote"></span></div>
+    <pre id="refreshLog" hidden></pre>
+  </div>
+  <h1>Montréal SUV Price Explorer</h1>
+  <p class="lede">Every RAV4, CR-V, Outback, Forester and Lexus RX listed within 100&nbsp;km of Montréal, in one slice-able view. Filter the market, read the price distribution, click any bar to pull up the exact vehicles inside it.</p>
+  <div class="rule"></div>
+</header>
+
+<!-- ============ FILTERS ============ -->
+<section class="card filters" aria-label="Filters">
+  <p class="sub" style="margin:0 0 12px">These filters change the summary, the distribution and the two charts below. Copy the page link to share exactly this view.</p>
+  <div class="filterrow">
+    <div class="fgroup">
+      <div class="flabel">Make</div>
+      <div class="chips" id="makeChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Model</div>
+      <div class="chips" id="modelChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Condition</div>
+      <div class="chips" id="condChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Powertrain</div>
+      <div class="chips" id="fuelChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Seller</div>
+      <div class="chips" id="sellerChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Drivetrain</div>
+      <div class="chips" id="dtChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Colour</div>
+      <div class="chips" id="colChips"></div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Model year</div>
+      <div class="dual">
+        <div class="dualtop"><span id="yrLo"></span><span id="yrHi"></span></div>
+        <div class="slider" id="yrSlider"></div>
+      </div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Mileage</div>
+      <div class="dual">
+        <div class="dualtop"><span id="kmLo"></span><span id="kmHi"></span></div>
+        <div class="slider" id="kmSlider"></div>
+      </div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">Price</div>
+      <div class="dual">
+        <div class="dualtop"><span id="prLo"></span><span id="prHi"></span></div>
+        <div class="slider" id="prSlider"></div>
+      </div>
+    </div>
+    <div class="fgroup">
+      <div class="flabel">&nbsp;</div>
+      <div class="chips">
+        <button class="tbtn" id="copyBtn" type="button">Copy link</button>
+        <button class="tbtn" id="resetBtn" type="button">Reset all</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TILES ============ -->
+<section class="tiles" id="tiles" aria-label="Summary of the current selection"></section>
+
+<!-- ============ SHORTLIST ============ -->
+<section class="card" id="shortlist">
+  <div class="listhead">
+    <div>
+      <h2>Household shortlist</h2>
+      <p class="sub" style="margin-bottom:0" id="slSub">Saved by anyone in the house, from any device.</p>
+    </div>
+  </div>
+  <p class="slnote" id="slNote" hidden></p>
+  <div class="listwrap" id="slWrap"></div>
+</section>
+
+<!-- ============ DISTRIBUTION + LIST ============ -->
+<section class="split">
+  <div class="card">
+    <div class="cardhead">
+      <div>
+        <h2>Distribution</h2>
+        <p class="sub" id="histSub">Click a bar to list the vehicles inside it.</p>
+      </div>
+      <div class="seg" id="histVar" role="group" aria-label="Distribution variable">
+        <button class="tbtn" type="button" data-v="price" aria-pressed="true">Price</button>
+        <button class="tbtn" type="button" data-v="km" aria-pressed="false">Mileage</button>
+        <button class="tbtn" type="button" data-v="year" aria-pressed="false">Year</button>
+      </div>
+    </div>
+    <div class="chartbox" id="histBox">
+      <svg id="histSvg" role="img" aria-label="Histogram of the filtered listings"></svg>
+      <div class="tip" id="histTip"></div>
+    </div>
+    <div class="legend" id="histLegend"></div>
+  </div>
+
+  <div class="card">
+    <div class="listhead">
+      <div>
+        <h2>Vehicles in selection</h2>
+        <p class="sub" id="listSub" style="margin-bottom:0"></p>
+      </div>
+      <div class="seg" id="sortSeg" role="group" aria-label="Sort listings">
+        <button class="tbtn" type="button" data-s="price">Price</button>
+        <button class="tbtn" type="button" data-s="km">Mileage</button>
+        <button class="tbtn" type="button" data-s="year">Year</button>
+        <button class="tbtn" type="button" data-s="cond">New/Used</button>
+        <button class="tbtn" type="button" data-s="deal">Value</button>
+      </div>
+    </div>
+    <div class="listwrap" id="listWrap"></div>
+  </div>
+</section>
+
+<!-- ============ DEPRECIATION BY YEAR ============ -->
+<section class="card">
+  <div class="cardhead">
+    <div>
+      <h2>Depreciation by model year</h2>
+      <p class="sub">Median asking price at each model year. Years with fewer than 3 listings in the current slice are dropped.</p>
+    </div>
+    <div class="seg" id="depMode" role="group" aria-label="Depreciation measure">
+      <button class="tbtn" type="button" data-m="abs" aria-pressed="true">Median price</button>
+      <button class="tbtn" type="button" data-m="ret" aria-pressed="false">% of newest</button>
+    </div>
+  </div>
+  <div class="chartbox" id="depBox">
+    <svg id="depSvg" role="img" aria-label="Median price by model year, one line per model"></svg>
+    <div class="tip" id="depTip"></div>
+  </div>
+  <div class="legend" id="depLegend"></div>
+</section>
+
+<!-- ============ PRICE VS MILEAGE ============ -->
+<section class="card">
+  <div class="cardhead">
+    <div>
+      <h2>Price against mileage</h2>
+      <p class="sub">One panel per model &mdash; each panel is a single colour, so the shapes compare without relying on hue. The heavy line is the median price per 25,000&nbsp;km band.</p>
+    </div>
+  </div>
+  <div class="sm" id="smWrap"></div>
+</section>
+
+
+<!-- ============ PREDICTOR ============ -->
+<section class="card">
+  <h2>What should this car cost?</h2>
+  <p class="sub">Describe a vehicle and get a typical asking price. The range is where most listings like this one land.</p>
+  <div class="pred">
+    <div class="predgrid" id="predGrid"></div>
+    <div class="predout">
+      <div class="k">Typical asking price</div>
+      <div class="big" id="predV">—</div>
+      <div class="rng" id="predR"></div>
+      <div class="n" id="predN"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SWEET SPOT ============ -->
+<section class="card">
+  <div class="cardhead">
+    <div>
+      <h2>Cost per remaining year</h2>
+      <p class="sub" style="max-width:76ch">Purchase price alone always favours the oldest car on the lot, so this charges upkeep too: the modelled price plus running costs, spread over the years left before the vehicle reaches end of life. The strongest colour is cheapest. These are <em>your</em> assumptions &mdash; move them.</p>
+    </div>
+  </div>
+  <div class="filterrow" style="margin:4px 0 18px">
+    <div class="fgroup"><div class="flabel">You drive</div>
+      <div class="dual" style="width:170px"><div class="dualtop"><span>per year</span><span id="ssKmV"></span></div><div class="slider solo"><input type="range" id="ssKm" min="8000" max="30000" step="1000" aria-label="Kilometres driven per year"></div></div></div>
+    <div class="fgroup"><div class="flabel">Upkeep, year one</div>
+      <div class="dual" style="width:170px"><div class="dualtop"><span>base</span><span id="ssBaseV"></span></div><div class="slider solo"><input type="range" id="ssBase" min="0" max="1500" step="50" aria-label="Base annual upkeep"></div></div></div>
+    <div class="fgroup"><div class="flabel">…rising each year of age</div>
+      <div class="dual" style="width:170px"><div class="dualtop"><span>+ per year</span><span id="ssRateV"></span></div><div class="slider solo"><input type="range" id="ssRate" min="0" max="400" step="10" aria-label="Upkeep increase per year of age"></div></div></div>
+    <div class="fgroup"><div class="flabel">End of life</div>
+      <div class="dual" style="width:170px"><div class="dualtop"><span>odometer</span><span id="ssLifeV"></span></div><div class="slider solo"><input type="range" id="ssLife" min="200000" max="450000" step="10000" aria-label="End of life odometer"></div></div></div>
+  </div>
+  <div class="heatwrap" id="heatWrap"></div>
+  <div class="ramp"><span>cheapest per year</span><span class="bar" id="rampBar"></span><span>most expensive</span></div>
+  <p class="note" style="margin-top:14px">Excludes fuel, insurance and registration, which barely differ across these five. It also assumes you keep the car to end of life &mdash; sell earlier and the newer end looks worse, because you eat the steep first-years drop without amortising it.</p>
+</section>
+
+<!-- ============ TABLES ============ -->
+<section class="card">
+  <div class="cardhead">
+    <div>
+      <h2>Table view</h2>
+      <p class="sub">The same numbers, without the charts &mdash; every value above is reachable here.</p>
+    </div>
+    <button class="tbtn" id="tableBtn" type="button" aria-pressed="false" aria-expanded="false">Show tables</button>
+  </div>
+  <div id="tableHost" hidden></div>
+</section>
+
+<div class="advtoggle">
+  <button class="tbtn" type="button" id="advBtn" aria-expanded="false" aria-controls="advanced">Show how the pricing model works</button>
+</div>
+
+<div id="advanced" hidden>
+<!-- ============ FAIR VALUE MODEL ============ -->
+<section class="card">
+  <h2>Separating age from mileage</h2>
+  <p class="sub" style="max-width:76ch">Fitted once on every used listing with a price, a year and an odometer reading &mdash; the filters at the top of the page do not change it. In this market model year and odometer are <strong id="mCorr"></strong> correlated &mdash; older cars have simply been driven more &mdash; so a median-by-year curve blends the two and calls the total &ldquo;depreciation&rdquo;. This fits both at once (restricted cubic splines on age and on log-mileage, against log price, with per-model slopes), which lets each be held still while the other moves.</p>
+  <div class="callouts" id="mCallouts"></div>
+  <p class="note" style="margin-top:14px" id="mSplit"></p>
+  <div class="two" style="margin-top:18px">
+    <div>
+      <div class="smtitle" style="margin-bottom:6px">Price against age <span class="n" id="mAgeSub"></span></div>
+      <div class="chartbox" id="paBox"><svg id="paSvg" role="img" aria-label="Fitted price against age, mileage held constant"></svg><div class="tip" id="paTip"></div></div>
+    </div>
+    <div>
+      <div class="smtitle" style="margin-bottom:6px">Price against mileage <span class="n" id="mKmSub"></span></div>
+      <div class="chartbox" id="pkBox"><svg id="pkSvg" role="img" aria-label="Fitted price against mileage, age held constant"></svg><div class="tip" id="pkTip"></div></div>
+    </div>
+  </div>
+  <div class="legend" id="pLegend"></div>
+  <div class="tablewrap" style="margin-top:18px">
+    <table id="specTable"><caption>Five-fold cross-validated accuracy. Each row adds to the row above it.</caption></table>
+  </div>
+</section>
+
+<!-- ============ ADJUSTED EFFECTS ============ -->
+<section class="card">
+  <h2>Premiums and spreads, once age and mileage are held equal</h2>
+  <p class="sub" style="max-width:76ch">Each row is the price difference for two otherwise identical vehicles &mdash; same model, same age, same odometer. Bars crossing the zero line are differences the data cannot distinguish from nothing.</p>
+  <div class="chartbox" id="dwBox"><svg id="dwSvg" role="img" aria-label="Adjusted price effects with 95% confidence intervals"></svg><div class="tip" id="dwTip"></div></div>
+  <p class="note" style="margin-top:12px" id="dwNote"></p>
+  <p class="sub" style="margin:12px 0 0" id="dwProv"></p>
+</section>
+<p class="note" style="margin:0">Asking prices, not transaction prices &mdash; a dealer&rsquo;s listed number is the top of the negotiation, and the spread between listed and sold is not visible in this data. &ldquo;Depreciation&rdquo; here is <em>cross-sectional</em>: it compares different cars of different ages listed on the same day, not one car followed over time, so it also absorbs trim mix, model redesigns and the used-market conditions of a single snapshot. <span id="footExcl"></span></p>
+</div>
+
+<footer>
+  <p style="margin:0"><strong id="footMeta"></strong> &middot; Prices are what sellers ask, not what buyers pay.</p>
+</footer>
+
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+/* ---------------- constants & helpers ---------------- */
+const M = DATA.models, MAKES = DATA.makes, ROWS = DATA.rows;
+const PM = DATA.model;   // fitted age + mileage price model
+const SERIES = ['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];   // colour follows the model, never its rank
+const I = {m:0, yr:1, pr:2, km:3, isNew:4, fuel:5, priv:6, city:7, seller:8, trim:9, url:10, fair:11, resid:12, dt:13, col:14, id:15};
+const BY_ID = new Map(ROWS.map(r => [r[I.id], r]));
+const UNIQ_MAKES = [...new Set(MAKES)];
+
+const $ = s => document.querySelector(s);
+const el = (t, cls) => { const n = document.createElementNS('http://www.w3.org/2000/svg', t); if (cls) n.setAttribute('class', cls); return n; };
+const money = n => '$' + Math.round(n).toLocaleString('en-CA');
+const moneySigned = n => (n < 0 ? '\u2212' : '+') + '$' + Math.abs(Math.round(n)).toLocaleString('en-CA');
+const moneyK = n => n >= 1000 ? '$' + (n/1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k' : '$' + Math.round(n);
+const kmFmt = n => n == null ? '—' : Math.round(n).toLocaleString('en-CA') + ' km';
+const kmK = n => (n/1000).toFixed(0) + 'k';
+
+function median(a){ if(!a.length) return null; const s=[...a].sort((x,y)=>x-y), m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function quantile(a,q){ if(!a.length) return null; const s=[...a].sort((x,y)=>x-y), p=(s.length-1)*q, lo=Math.floor(p), hi=Math.ceil(p);
+  return lo===hi ? s[lo] : s[lo]+(s[hi]-s[lo])*(p-lo); }
+function slope(pts){ // least-squares slope of y on x
+  const n=pts.length; if(n<3) return null;
+  let sx=0,sy=0,sxx=0,sxy=0;
+  for(const [x,y] of pts){ sx+=x; sy+=y; sxx+=x*x; sxy+=x*y; }
+  const d = n*sxx - sx*sx; if(!d) return null;
+  return (n*sxy - sx*sy)/d;
+}
+function spreadLabels(items, minGap, top, bottom){
+  // items: [{y, draw}] — nudge apart so converging series keep readable labels
+  const a = items.slice().sort((p,q) => p.y - q.y);
+  for(let i=1;i<a.length;i++) if(a[i].y - a[i-1].y < minGap) a[i].y = a[i-1].y + minGap;
+  const over = a.length ? a[a.length-1].y - bottom : 0;
+  if(over > 0) for(const it of a) it.y -= over;
+  for(let i=a.length-2;i>=0;i--) if(a[i+1].y - a[i].y < minGap) a[i].y = a[i+1].y - minGap;
+  if(a.length && a[0].y < top){ const d = top - a[0].y; for(const it of a) it.y += d; }
+  a.forEach(it => it.draw(it.y));
+}
+function niceStep(range, target){
+  const raw = range/target, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw/mag;
+  return (n<1.5?1:n<3?2:n<7?5:10)*mag;
+}
+
+/* domain bounds from the full dataset */
+const YR = [Math.min(...ROWS.map(r=>r[I.yr])), Math.max(...ROWS.map(r=>r[I.yr]))];
+const KMV = ROWS.map(r=>r[I.km]).filter(v=>v!=null);
+const KM = [0, Math.ceil(Math.max(...KMV)/10000)*10000];
+const PR = [Math.floor(Math.min(...ROWS.map(r=>r[I.pr]))/1000)*1000, Math.ceil(Math.max(...ROWS.map(r=>r[I.pr]))/1000)*1000];
+
+/* fair-price baseline: median for model+year across the FULL dataset (stable, filter-independent) */
+const BASE = new Map();
+{
+  const acc = new Map();
+  for(const r of ROWS){ const k = r[I.m]+'|'+r[I.yr]; (acc.get(k) || acc.set(k,[]).get(k)).push(r[I.pr]); }
+  for(const [k,v] of acc) if(v.length>=5) BASE.set(k, median(v));
+}
+const medPct = r => { const b = BASE.get(r[I.m]+'|'+r[I.yr]); return b ? (r[I.pr]-b)/b*100 : null; };
+const dealPct = r => r[I.resid] != null ? r[I.resid] : medPct(r);
+
+/* ---------------- state ---------------- */
+const state = {
+  models: new Set(M.map((_,i)=>i)),
+  cond: 'all',                       // all | used | new
+  fuels: new Set(),                  // empty = all
+  seller: 'all',                     // all | dealer | private
+  dts: new Set(),                    // empty = all
+  cols: new Set(),                   // empty = all
+  yr: [...YR], km: [...KM], pr: [...PR],
+  histVar: 'price', bin: null, sort: 'price', sortDir: 1, depMode: 'abs', tables: false,
+};
+
+function filtered(){
+  return ROWS.filter(r =>
+    state.models.has(r[I.m]) &&
+    (state.cond === 'all' || (state.cond === 'new') === (r[I.isNew] === 1)) &&
+    (state.fuels.size === 0 || state.fuels.has(r[I.fuel])) &&
+    (state.seller === 'all' || (state.seller === 'private') === (r[I.priv] === 1)) &&
+    (state.dts.size === 0 || state.dts.has(r[I.dt])) &&
+    (state.cols.size === 0 || state.cols.has(r[I.col])) &&
+    r[I.yr] >= state.yr[0] && r[I.yr] <= state.yr[1] &&
+    r[I.pr] >= state.pr[0] && r[I.pr] <= state.pr[1] &&
+    (r[I.km] == null ? state.km[0] === KM[0] : (r[I.km] >= state.km[0] && r[I.km] <= state.km[1]))
+  );
+}
+
+/* ---------------- filter UI ---------------- */
+function chip(label, pressed, onClick, colorIdx){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', pressed);
+  if(colorIdx != null){
+    const d = document.createElement('span');
+    d.className = 'dot'; d.style.background = SERIES[colorIdx];
+    b.appendChild(d);
+  }
+  b.appendChild(document.createTextNode(label));
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function buildChips(){
+  const mk = $('#makeChips'); mk.textContent = '';
+  UNIQ_MAKES.forEach(mkName => {
+    const idxs = M.map((_,i)=>i).filter(i => MAKES[i] === mkName);
+    const on = idxs.every(i => state.models.has(i));
+    mk.appendChild(chip(mkName, on, () => {
+      const allOn = idxs.every(i => state.models.has(i));
+      idxs.forEach(i => allOn ? state.models.delete(i) : state.models.add(i));
+      if(state.models.size === 0) idxs.forEach(i => state.models.add(i));
+      state.bin = null; renderAll();
+    }));
+  });
+
+  const md = $('#modelChips'); md.textContent = '';
+  M.forEach((name, i) => md.appendChild(chip(name, state.models.has(i), () => {
+    state.models.has(i) ? state.models.delete(i) : state.models.add(i);
+    if(state.models.size === 0) state.models.add(i);
+    state.bin = null; renderAll();
+  }, i)));
+
+  const cd = $('#condChips'); cd.textContent = '';
+  [['all','All'],['used','Used'],['new','New']].forEach(([v,l]) =>
+    cd.appendChild(chip(l, state.cond === v, () => { state.cond = v; state.bin = null; renderAll(); })));
+
+  const fl = $('#fuelChips'); fl.textContent = '';
+  fl.appendChild(chip('All', state.fuels.size === 0, () => { state.fuels.clear(); state.bin = null; renderAll(); }));
+  DATA.fuels.forEach((name, i) => {
+    if(!ROWS.some(r => r[I.fuel] === i)) return;
+    fl.appendChild(chip(name, state.fuels.has(i), () => {
+      state.fuels.has(i) ? state.fuels.delete(i) : state.fuels.add(i);
+      state.bin = null; renderAll();
+    }));
+  });
+
+  const dtc = $('#dtChips'); dtc.textContent = '';
+  dtc.appendChild(chip('All', state.dts.size === 0, () => { state.dts.clear(); state.bin = null; renderAll(); }));
+  DATA.drivetrains.forEach((name, i) => {
+    if(!ROWS.some(r => r[I.dt] === i)) return;
+    dtc.appendChild(chip(name, state.dts.has(i), () => {
+      state.dts.has(i) ? state.dts.delete(i) : state.dts.add(i);
+      state.bin = null; renderAll();
+    }));
+  });
+
+  const cc = $('#colChips'); cc.textContent = '';
+  cc.appendChild(chip('All', state.cols.size === 0, () => { state.cols.clear(); state.bin = null; renderAll(); }));
+  DATA.colours.forEach((name, i) => {
+    if(!ROWS.some(r => r[I.col] === i)) return;
+    cc.appendChild(chip(name, state.cols.has(i), () => {
+      state.cols.has(i) ? state.cols.delete(i) : state.cols.add(i);
+      state.bin = null; renderAll();
+    }));
+  });
+
+  const sl = $('#sellerChips'); sl.textContent = '';
+  [['all','All'],['dealer','Dealer'],['private','Private']].forEach(([v,l]) =>
+    sl.appendChild(chip(l, state.seller === v, () => { state.seller = v; state.bin = null; renderAll(); })));
+}
+
+function dualSlider(host, dom, key, fmt, loEl, hiEl, step){
+  host.textContent = '';
+  const track = document.createElement('div'); track.className = 'track';
+  const fill = document.createElement('div'); fill.className = 'fill';
+  const lo = document.createElement('input'), hi = document.createElement('input');
+  [lo,hi].forEach((inp,k) => {
+    inp.type = 'range'; inp.min = dom[0]; inp.max = dom[1]; inp.step = step;
+    inp.value = state[key][k];
+    inp.setAttribute('aria-label', (k ? 'Maximum ' : 'Minimum ') + key);
+  });
+  host.append(track, fill, lo, hi);
+  const paint = () => {
+    const [a,b] = state[key], span = dom[1]-dom[0];
+    fill.style.left = ((a-dom[0])/span*100) + '%';
+    fill.style.width = ((b-a)/span*100) + '%';
+    loEl.textContent = fmt(a); hiEl.textContent = fmt(b);
+  };
+  const onIn = k => () => {
+    let a = +lo.value, b = +hi.value;
+    if(k === 0 && a > b) { a = b; lo.value = a; }
+    if(k === 1 && b < a) { b = a; hi.value = b; }
+    state[key] = [a,b]; state.bin = null; paint(); renderAll(false);
+  };
+  lo.addEventListener('input', onIn(0));
+  hi.addEventListener('input', onIn(1));
+  paint();
+  return paint;
+}
+
+/* ---------------- sorting ---------------- */
+// each key carries the direction it should open on: cheapest first, but newest first
+const SORTS = {
+  price: { label: 'Price',    get: r => r[I.pr],                 dir:  1, asc: 'cheapest first', desc: 'dearest first' },
+  km:    { label: 'Mileage',  get: r => r[I.km] ?? Infinity,     dir:  1, asc: 'fewest km first', desc: 'most km first' },
+  year:  { label: 'Year',     get: r => r[I.yr],                 dir: -1, asc: 'oldest first', desc: 'newest first' },
+  cond:  { label: 'New/Used', get: r => r[I.isNew] ? 1 : 0,      dir:  1, asc: 'used first', desc: 'new first' },
+  deal:  { label: 'Value',    get: r => dealPct(r) ?? Infinity,  dir:  1, asc: 'best deals first', desc: 'priciest first' },
+};
+function sortRows(rows){
+  const g = SORTS[state.sort].get, d = state.sortDir;
+  return [...rows].sort((a,b) => {
+    const va = g(a), vb = g(b);
+    if(va !== vb) return (va < vb ? -1 : 1) * d;
+    return a[I.pr] - b[I.pr];                     // stable tie-break on price
+  });
+}
+function paintSortButtons(){
+  $('#sortSeg').querySelectorAll('button').forEach(b => {
+    const on = b.dataset.s === state.sort;
+    b.setAttribute('aria-pressed', on);
+    b.textContent = SORTS[b.dataset.s].label + (on ? (state.sortDir === 1 ? ' \u2191' : ' \u2193') : '');
+    b.title = on
+      ? SORTS[b.dataset.s].label + ': ' + (state.sortDir === 1 ? SORTS[b.dataset.s].asc : SORTS[b.dataset.s].desc) + ' — click to reverse'
+      : 'Sort by ' + SORTS[b.dataset.s].label.toLowerCase();
+  });
+}
+
+/* ---------------- histogram ---------------- */
+const HIST = {
+  price: { get: r => r[I.pr], dom: () => state.pr, fmt: moneyK, title: 'Asking price (CAD)', target: 22 },
+  km:    { get: r => r[I.km], dom: () => state.km, fmt: v => kmK(v), title: 'Mileage (km)', target: 20 },
+  year:  { get: r => r[I.yr], dom: () => state.yr, fmt: v => String(v), title: 'Model year', target: 0 },
+};
+
+function binData(rows){
+  const cfg = HIST[state.histVar], [d0,d1] = cfg.dom();
+  let edges = [];
+  if(state.histVar === 'year'){
+    for(let y = d0; y <= d1 + 1; y++) edges.push(y);
+  } else {
+    const step = niceStep(Math.max(d1-d0, 1), cfg.target);
+    const s = Math.floor(d0/step)*step;
+    for(let v = s; v < d1 + step; v += step) edges.push(v);
+  }
+  const bins = edges.slice(0,-1).map((lo,i) => ({ lo, hi: edges[i+1], rows: [], byModel: M.map(()=>0) }));
+  for(const r of rows){
+    const v = cfg.get(r); if(v == null) continue;
+    let i = 0;
+    if(state.histVar === 'year') i = v - edges[0];
+    else i = Math.floor((v - edges[0]) / (edges[1]-edges[0]));
+    if(i < 0 || i >= bins.length) i = Math.max(0, Math.min(bins.length-1, i));
+    bins[i].rows.push(r); bins[i].byModel[r[I.m]]++;
+  }
+  return bins;
+}
+
+function renderHist(rows){
+  const svg = $('#histSvg'), tip = $('#histTip');
+  svg.textContent = '';
+  const W = 720, H = 340, pad = { t: 12, r: 14, b: 46, l: 52 };
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const bins = binData(rows);
+  const maxC = Math.max(1, ...bins.map(b => b.rows.length));
+  const cfg = HIST[state.histVar];
+
+  const yTicks = [];
+  const yStep = niceStep(maxC, 4);
+  for(let v = 0; v <= maxC; v += yStep) yTicks.push(v);
+
+  yTicks.forEach(v => {
+    const y = pad.t + ih - (v/maxC)*ih;
+    const l = el('line','gridline');
+    l.setAttribute('x1',pad.l); l.setAttribute('x2',pad.l+iw); l.setAttribute('y1',y); l.setAttribute('y2',y);
+    svg.appendChild(l);
+    const t = el('text','tick');
+    t.setAttribute('x',pad.l-9); t.setAttribute('y',y+4); t.setAttribute('text-anchor','end');
+    t.textContent = v; svg.appendChild(t);
+  });
+
+  const bw = iw / bins.length;
+  const active = [...state.models].sort((a,b)=>a-b);
+
+  bins.forEach((b, i) => {
+    const x = pad.l + i*bw;
+    const g = el('g', 'bar' + (state.bin === i ? ' sel' : ''));
+    g.setAttribute('tabindex','0');
+    g.setAttribute('role','button');
+    const lbl = state.histVar === 'year' ? String(b.lo) : `${cfg.fmt(b.lo)} to ${cfg.fmt(b.hi)}`;
+    g.setAttribute('aria-label', `${lbl}: ${b.rows.length} listings`);
+
+    const hit = el('rect','hit');
+    hit.setAttribute('x',x); hit.setAttribute('y',pad.t); hit.setAttribute('width',bw); hit.setAttribute('height',ih);
+    hit.setAttribute('fill','transparent'); g.appendChild(hit);
+
+    let acc = 0;
+    active.forEach(mi => {
+      const c = b.byModel[mi]; if(!c) return;
+      const h = (c/maxC)*ih, y = pad.t + ih - ((acc+c)/maxC)*ih;
+      const rct = el('rect','seg');
+      rct.setAttribute('x', x+1.5); rct.setAttribute('y', y);
+      rct.setAttribute('width', Math.max(1, bw-3)); rct.setAttribute('height', Math.max(0.5, h));
+      rct.style.fill = SERIES[mi];
+      rct.setAttribute('rx', 2);
+      g.appendChild(rct); acc += c;
+    });
+
+    const show = ev => {
+      const rect = $('#histBox').getBoundingClientRect();
+      const px = (ev.clientX ?? rect.left + rect.width/2) - rect.left;
+      tip.textContent = '';
+      const h = document.createElement('div'); h.className = 'th'; h.textContent = lbl; tip.appendChild(h);
+      active.forEach(mi => {
+        if(!b.byModel[mi]) return;
+        const row = document.createElement('div'); row.className = 'tr';
+        const left = document.createElement('div'); left.className = 'tl';
+        const k = document.createElement('span'); k.className = 'tk'; k.style.background = SERIES[mi];
+        left.append(k, document.createTextNode(M[mi]));
+        const v = document.createElement('span'); v.className = 'tv'; v.textContent = b.byModel[mi];
+        row.append(left, v); tip.appendChild(row);
+      });
+      const tot = document.createElement('div'); tot.className = 'tr';
+      const tl = document.createElement('div'); tl.className = 'tl'; tl.textContent = 'Total';
+      const tv = document.createElement('span'); tv.className = 'tv'; tv.textContent = b.rows.length;
+      tot.append(tl, tv); tip.appendChild(tot);
+      tip.style.opacity = 1;
+      const tw = tip.offsetWidth;
+      tip.style.left = Math.max(4, Math.min(px - tw/2, rect.width - tw - 4)) + 'px';
+      tip.style.top = '4px';
+    };
+    g.addEventListener('pointermove', show);
+    g.addEventListener('focus', show);
+    g.addEventListener('pointerleave', () => tip.style.opacity = 0);
+    g.addEventListener('blur', () => tip.style.opacity = 0);
+    const pick = () => { state.bin = (state.bin === i ? null : i); renderAll(); };
+    g.addEventListener('click', pick);
+    g.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); pick(); } });
+    svg.appendChild(g);
+  });
+
+  // x axis
+  const ax = el('line','axisline');
+  ax.setAttribute('x1',pad.l); ax.setAttribute('x2',pad.l+iw);
+  ax.setAttribute('y1',pad.t+ih); ax.setAttribute('y2',pad.t+ih); svg.appendChild(ax);
+
+  const every = Math.ceil(bins.length / 9);
+  bins.forEach((b,i) => {
+    if(i % every) return;
+    const t = el('text','tick');
+    t.setAttribute('x', pad.l + i*bw + bw/2); t.setAttribute('y', pad.t+ih+17);
+    t.setAttribute('text-anchor','middle');
+    t.textContent = cfg.fmt(b.lo); svg.appendChild(t);
+  });
+  const at = el('text','axistitle');
+  at.setAttribute('x', pad.l+iw/2); at.setAttribute('y', H-6); at.setAttribute('text-anchor','middle');
+  at.textContent = cfg.title; svg.appendChild(at);
+  const yt = el('text','axistitle');
+  yt.setAttribute('transform', `translate(13,${pad.t+ih/2}) rotate(-90)`); yt.setAttribute('text-anchor','middle');
+  yt.textContent = 'Listings'; svg.appendChild(yt);
+
+  // legend
+  const lg = $('#histLegend'); lg.textContent = '';
+  active.forEach(mi => {
+    const d = document.createElement('div'); d.className = 'li';
+    const s = document.createElement('span'); s.className = 'sw'; s.style.background = SERIES[mi];
+    d.append(s, document.createTextNode(M[mi]));
+    lg.appendChild(d);
+  });
+  return bins;
+}
+
+/* ---------------- listing rows (shared by the list and the shortlist) ---------------- */
+// A plain snapshot of what a row shows. Live rows come from rowFields(); shortlist
+// entries are stored this way so a car still renders after it leaves the feed.
+function rowFields(r){
+  return {
+    id: r[I.id], url: r[I.url], m: r[I.m], model: M[r[I.m]], year: r[I.yr], price: r[I.pr], km: r[I.km],
+    trim: r[I.trim] != null && DATA.trims[r[I.trim]] !== '—' ? DATA.trims[r[I.trim]] : '',
+    isNew: r[I.isNew] === 1,
+    dt: DATA.drivetrains[r[I.dt]] === 'Unknown' ? '' : DATA.drivetrains[r[I.dt]],
+    fuel: DATA.fuels[r[I.fuel]],
+    colour: DATA.colours[r[I.col]] === 'Unknown' ? '' : DATA.colours[r[I.col]],
+    city: DATA.cities[r[I.city]],
+    seller: r[I.priv] ? 'Private seller' : DATA.sellers[r[I.seller]],
+  };
+}
+
+function valueBadge(r){
+  const d = dealPct(r);
+  if(d == null) return null;
+  const base = r[I.resid] != null ? r[I.fair] : BASE.get(r[I.m]+'|'+r[I.yr]);
+  const gap = Math.round(Math.abs(r[I.pr] - base) / 100) * 100;
+  const tag = document.createElement('span');
+  tag.className = 'delta ' + (d <= -7 ? 'under' : d >= 7 ? 'over' : 'par');
+  tag.textContent = d <= -7 ? `Good deal · ~${money(gap)} under typical`
+                  : d >= 7  ? `Pricey · ~${money(gap)} over typical`
+                  : 'Fair price';
+  const pct = document.createElement('span'); pct.className = 'pct';
+  pct.textContent = `(${d < 0 ? '−' : '+'}${Math.abs(d).toFixed(0)}%)`;
+  tag.appendChild(pct);
+  tag.title = r[I.resid] != null
+    ? `Typical asking price for this model, year, mileage and options: ${money(base)}`
+    : `Median asking price for a ${r[I.yr]} ${M[r[I.m]]}: ${money(base)}`;
+  return tag;
+}
+
+// opts.row: the live data row (badge + save button). opts.extra: nodes appended to .r2.
+function listingRow(f, opts = {}){
+  const div = document.createElement('div'); div.className = 'row';
+
+  const r1 = document.createElement('div'); r1.className = 'r1';
+  const nm = document.createElement('div'); nm.className = 'rname';
+  const dot = document.createElement('span'); dot.className = 'dot';
+  dot.style.background = f.m != null ? SERIES[f.m] : 'var(--muted)';
+  const tx = document.createElement('a'); tx.className = 't';
+  tx.href = f.url; tx.target = '_blank'; tx.rel = 'noopener noreferrer';
+  tx.textContent = `${f.year} ${f.model}${f.trim ? ' · ' + f.trim : ''}`;
+  nm.append(dot, tx);
+  const right = document.createElement('div'); right.className = 'rright';
+  const pr = document.createElement('div'); pr.className = 'rprice'; pr.textContent = money(f.price);
+  right.appendChild(pr);
+  if(opts.row && f.id) right.appendChild(saveButton(f, opts.row));
+  r1.append(nm, right); div.appendChild(r1);
+
+  const r2 = document.createElement('div'); r2.className = 'r2';
+  [f.isNew ? 'New' : 'Used', kmFmt(f.km), f.dt, f.fuel, f.colour, f.city, f.seller]
+    .filter(Boolean).forEach((b, i) => {
+      if(i){ const s = document.createElement('span'); s.className = 'sep'; s.textContent = '·'; r2.appendChild(s); }
+      const s = document.createElement('span'); s.textContent = b; r2.appendChild(s);
+    });
+  if(opts.row){ const tag = valueBadge(opts.row); if(tag) r2.appendChild(tag); }
+  (opts.extra || []).forEach(n => r2.appendChild(n));
+  div.appendChild(r2);
+  return div;
+}
+
+/* ---------------- listing panel ---------------- */
+function renderList(bins, rows){
+  const wrap = $('#listWrap'); wrap.textContent = '';
+  const cfg = HIST[state.histVar];
+  let subset, label;
+  if(state.bin != null && bins[state.bin]){
+    const b = bins[state.bin];
+    subset = b.rows;
+    label = state.histVar === 'year' ? `Model year ${b.lo}` : `${cfg.fmt(b.lo)} – ${cfg.fmt(b.hi)}`;
+  } else {
+    subset = rows;
+    label = 'All of the current filter';
+  }
+  const sd = SORTS[state.sort];
+  $('#listSub').textContent = `${label} · ${subset.length.toLocaleString('en-CA')} vehicle${subset.length===1?'':'s'} · `
+    + (state.sortDir === 1 ? sd.asc : sd.desc);
+
+  const sorted = sortRows(subset);
+  paintSortButtons();
+
+  if(!sorted.length){
+    const e = document.createElement('div'); e.className = 'empty';
+    e.textContent = 'No vehicles match these filters.'; wrap.appendChild(e); return;
+  }
+
+  const CAP = 300;
+  sorted.slice(0, CAP).forEach(r => wrap.appendChild(listingRow(rowFields(r), { row: r })));
+
+  if(sorted.length > CAP){
+    const e = document.createElement('div'); e.className = 'empty';
+    e.textContent = `Showing the first ${CAP} of ${sorted.length.toLocaleString('en-CA')}. Narrow the filters or click a single bar to see fewer.`;
+    wrap.appendChild(e);
+  }
+}
+
+/* ---------------- depreciation by year ---------------- */
+function depSeries(rows){
+  const out = [];
+  [...state.models].sort((a,b)=>a-b).forEach(mi => {
+    const byYear = new Map();
+    rows.filter(r => r[I.m] === mi).forEach(r => {
+      (byYear.get(r[I.yr]) || byYear.set(r[I.yr], []).get(r[I.yr])).push(r[I.pr]);
+    });
+    const pts = [...byYear.entries()]
+      .filter(([,v]) => v.length >= 3)
+      .map(([y,v]) => ({ x: y, med: median(v), n: v.length }))
+      .sort((a,b) => a.x - b.x);
+    if(pts.length >= 2) out.push({ mi, pts });
+  });
+  return out;
+}
+
+function renderDep(rows){
+  const svg = $('#depSvg'), tip = $('#depTip'); svg.textContent = '';
+  const W = 900, H = 380, pad = { t: 14, r: 96, b: 46, l: 62 };
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+  const series = depSeries(rows);
+  const lg = $('#depLegend'); lg.textContent = '';
+
+  if(!series.length){
+    const t = el('text','tick');
+    t.setAttribute('x', W/2); t.setAttribute('y', H/2); t.setAttribute('text-anchor','middle');
+    t.textContent = 'Not enough listings in this slice to draw a curve.';
+    svg.appendChild(t); return series;
+  }
+
+  const rel = state.depMode === 'ret';
+  const val = (s, p) => rel ? p.med / s.pts[s.pts.length-1].med * 100 : p.med;
+  const xs = series.flatMap(s => s.pts.map(p => p.x));
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const ys = series.flatMap(s => s.pts.map(p => val(s,p)));
+  const yMax = Math.max(...ys), yMin = Math.min(...ys);
+  const yTop = rel ? Math.ceil(yMax/10)*10 : Math.ceil(yMax/5000)*5000;
+  const yBot = rel ? Math.max(0, Math.floor(yMin/10)*10 - 10) : 0;
+
+  const X = v => pad.l + (x1 === x0 ? iw/2 : (v-x0)/(x1-x0)*iw);
+  const Y = v => pad.t + ih - (v-yBot)/(yTop-yBot)*ih;
+
+  const yStep = niceStep(yTop-yBot, 5);
+  for(let v = yBot; v <= yTop + 1e-6; v += yStep){
+    const y = Y(v);
+    const l = el('line','gridline');
+    l.setAttribute('x1',pad.l); l.setAttribute('x2',pad.l+iw); l.setAttribute('y1',y); l.setAttribute('y2',y);
+    svg.appendChild(l);
+    const t = el('text','tick');
+    t.setAttribute('x',pad.l-9); t.setAttribute('y',y+4); t.setAttribute('text-anchor','end');
+    t.textContent = rel ? Math.round(v) + '%' : moneyK(v);
+    svg.appendChild(t);
+  }
+
+  const ax = el('line','axisline');
+  ax.setAttribute('x1',pad.l); ax.setAttribute('x2',pad.l+iw);
+  ax.setAttribute('y1',pad.t+ih); ax.setAttribute('y2',pad.t+ih); svg.appendChild(ax);
+  const yearsAll = [...new Set(xs)].sort((a,b)=>a-b);
+  const evy = Math.ceil(yearsAll.length/12);
+  yearsAll.forEach((y,i) => {
+    if(i % evy) return;
+    const t = el('text','tick');
+    t.setAttribute('x', X(y)); t.setAttribute('y', pad.t+ih+17); t.setAttribute('text-anchor','middle');
+    t.textContent = y; svg.appendChild(t);
+  });
+  const at = el('text','axistitle');
+  at.setAttribute('x', pad.l+iw/2); at.setAttribute('y', H-6); at.setAttribute('text-anchor','middle');
+  at.textContent = 'Model year'; svg.appendChild(at);
+  const yt = el('text','axistitle');
+  yt.setAttribute('transform', `translate(15,${pad.t+ih/2}) rotate(-90)`); yt.setAttribute('text-anchor','middle');
+  yt.textContent = rel ? 'Share of newest-year median' : 'Median asking price';
+  svg.appendChild(yt);
+
+  const depLabels = [];
+  series.forEach(s => {
+    const d = s.pts.map((p,i) => (i?'L':'M') + X(p.x).toFixed(1) + ' ' + Y(val(s,p)).toFixed(1)).join(' ');
+    const path = el('path');
+    path.setAttribute('d', d); path.setAttribute('fill','none');
+    path.style.stroke = SERIES[s.mi]; path.setAttribute('stroke-width', 2);
+    path.setAttribute('stroke-linejoin','round'); path.setAttribute('stroke-linecap','round');
+    svg.appendChild(path);
+    s.pts.forEach(p => {
+      const c = el('circle');
+      c.setAttribute('cx', X(p.x)); c.setAttribute('cy', Y(val(s,p))); c.setAttribute('r', 3.2);
+      c.style.fill = SERIES[s.mi];
+      c.style.stroke = 'var(--surface)'; c.setAttribute('stroke-width', 2);
+      svg.appendChild(c);
+    });
+    // direct label at the endpoint (<=4 series, so identity is never colour-alone)
+    const last = s.pts[s.pts.length-1];
+    const yEnd = Y(val(s,last));
+    depLabels.push({ y: yEnd, draw: yy => {
+      if(Math.abs(yy - yEnd) > 2){
+        const ld = el('path');
+        ld.setAttribute('d', `M ${X(last.x)} ${yEnd} L ${X(last.x)+5} ${yy-4}`);
+        ld.setAttribute('fill','none'); ld.style.stroke = SERIES[s.mi];
+        ld.setAttribute('stroke-width',1); ld.setAttribute('opacity',.5); svg.appendChild(ld);
+      }
+      const t = el('text','dlabel');
+      t.setAttribute('x', X(last.x)+9); t.setAttribute('y', yy);
+      t.style.fill = SERIES[s.mi]; t.textContent = M[s.mi]; svg.appendChild(t);
+    }});
+
+    const d2 = document.createElement('div'); d2.className = 'li';
+    const sw = document.createElement('span'); sw.className = 'swl'; sw.style.background = SERIES[s.mi];
+    d2.append(sw, document.createTextNode(M[s.mi]));
+    lg.appendChild(d2);
+  });
+
+  spreadLabels(depLabels, 16, pad.t + 10, pad.t + ih);
+
+  // crosshair + shared tooltip
+  const cross = el('line');
+  cross.style.stroke = 'var(--axis)'; cross.setAttribute('stroke-width',1);
+  cross.setAttribute('y1',pad.t); cross.setAttribute('y2',pad.t+ih);
+  cross.setAttribute('opacity',0); svg.appendChild(cross);
+
+  const overlay = el('rect');
+  overlay.setAttribute('x',pad.l); overlay.setAttribute('y',pad.t);
+  overlay.setAttribute('width',iw); overlay.setAttribute('height',ih);
+  overlay.setAttribute('fill','transparent'); svg.appendChild(overlay);
+
+  const move = ev => {
+    const box = $('#depBox').getBoundingClientRect();
+    const sx = (ev.clientX - box.left) / box.width * W;
+    let best = yearsAll[0];
+    yearsAll.forEach(y => { if(Math.abs(X(y)-sx) < Math.abs(X(best)-sx)) best = y; });
+    cross.setAttribute('x1', X(best)); cross.setAttribute('x2', X(best)); cross.setAttribute('opacity', 1);
+    tip.textContent = '';
+    const h = document.createElement('div'); h.className = 'th'; h.textContent = 'Model year ' + best; tip.appendChild(h);
+    series.forEach(s => {
+      const p = s.pts.find(p => p.x === best); if(!p) return;
+      const row = document.createElement('div'); row.className = 'tr';
+      const left = document.createElement('div'); left.className = 'tl';
+      const k = document.createElement('span'); k.className = 'tk'; k.style.background = SERIES[s.mi];
+      left.append(k, document.createTextNode(M[s.mi] + ' (n=' + p.n + ')'));
+      const v = document.createElement('span'); v.className = 'tv';
+      v.textContent = rel ? val(s,p).toFixed(0) + '%' : money(p.med);
+      row.append(left, v); tip.appendChild(row);
+    });
+    tip.style.opacity = 1;
+    const tw = tip.offsetWidth, px = X(best)/W*box.width;
+    tip.style.left = Math.max(4, Math.min(px + 14, box.width - tw - 4)) + 'px';
+    tip.style.top = '6px';
+  };
+  overlay.addEventListener('pointermove', move);
+  overlay.addEventListener('pointerleave', () => { tip.style.opacity = 0; cross.setAttribute('opacity',0); });
+  return series;
+}
+
+/* ---------------- price vs mileage, faceted ---------------- */
+function renderSmall(rows){
+  const host = $('#smWrap'); host.textContent = '';
+  const active = [...state.models].sort((a,b)=>a-b);
+  const withKm = rows.filter(r => r[I.km] != null);
+  const kmMax = Math.max(10000, ...withKm.map(r => r[I.km]));
+  const prMax = Math.max(1, ...withKm.map(r => r[I.pr]));
+  const xTop = Math.ceil(kmMax/25000)*25000, yTop = Math.ceil(prMax/10000)*10000;
+
+  active.forEach(mi => {
+    const pts = withKm.filter(r => r[I.m] === mi);
+    const cell = document.createElement('div'); cell.className = 'smcell';
+
+    const ttl = document.createElement('div'); ttl.className = 'smtitle';
+    const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = SERIES[mi];
+    const nm = document.createElement('span'); nm.textContent = M[mi];
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = pts.length + ' listings';
+    ttl.append(dot, nm, n); cell.appendChild(ttl);
+
+    const W = 340, H = 250, pad = { t: 10, r: 10, b: 38, l: 48 };
+    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    const svg = el('svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('role','img');
+    svg.setAttribute('aria-label', `${M[mi]}: asking price against mileage, ${pts.length} listings`);
+    const X = v => pad.l + v/xTop*iw, Y = v => pad.t + ih - v/yTop*ih;
+
+    const yStep = niceStep(yTop, 4);
+    for(let v = 0; v <= yTop; v += yStep){
+      const l = el('line','gridline');
+      l.setAttribute('x1',pad.l); l.setAttribute('x2',pad.l+iw); l.setAttribute('y1',Y(v)); l.setAttribute('y2',Y(v));
+      svg.appendChild(l);
+      const t = el('text','tick');
+      t.setAttribute('x',pad.l-8); t.setAttribute('y',Y(v)+4); t.setAttribute('text-anchor','end');
+      t.textContent = moneyK(v); svg.appendChild(t);
+    }
+    const xStep = niceStep(xTop, 4);
+    for(let v = 0; v <= xTop; v += xStep){
+      const t = el('text','tick');
+      t.setAttribute('x',X(v)); t.setAttribute('y',pad.t+ih+16); t.setAttribute('text-anchor','middle');
+      t.textContent = kmK(v); svg.appendChild(t);
+    }
+    const ax = el('line','axisline');
+    ax.setAttribute('x1',pad.l); ax.setAttribute('x2',pad.l+iw);
+    ax.setAttribute('y1',pad.t+ih); ax.setAttribute('y2',pad.t+ih); svg.appendChild(ax);
+    const at = el('text','axistitle');
+    at.setAttribute('x',pad.l+iw/2); at.setAttribute('y',H-4); at.setAttribute('text-anchor','middle');
+    at.textContent = 'Mileage (km)'; svg.appendChild(at);
+
+    pts.forEach(r => {
+      const c = el('circle');
+      c.setAttribute('cx', X(r[I.km])); c.setAttribute('cy', Y(r[I.pr])); c.setAttribute('r', 2.6);
+      c.style.fill = SERIES[mi]; c.setAttribute('fill-opacity', .5);
+      svg.appendChild(c);
+    });
+
+    // median price per 25,000 km band
+    const BAND = 25000, bands = new Map();
+    pts.forEach(r => { const b = Math.floor(r[I.km]/BAND); (bands.get(b) || bands.set(b,[]).get(b)).push(r[I.pr]); });
+    const trend = [...bands.entries()].filter(([,v]) => v.length >= 4)
+      .map(([b,v]) => ({ x: b*BAND + BAND/2, y: median(v), n: v.length }))
+      .sort((a,b) => a.x - b.x);
+    if(trend.length >= 2){
+      const p = el('path');
+      p.setAttribute('d', trend.map((t,i) => (i?'L':'M') + X(t.x).toFixed(1) + ' ' + Y(t.y).toFixed(1)).join(' '));
+      p.setAttribute('fill','none'); p.style.stroke = SERIES[mi]; p.setAttribute('stroke-width', 2.5);
+      p.setAttribute('stroke-linejoin','round'); p.setAttribute('stroke-linecap','round');
+      svg.appendChild(p);
+      trend.forEach(t => {
+        const c = el('circle');
+        c.setAttribute('cx',X(t.x)); c.setAttribute('cy',Y(t.y)); c.setAttribute('r',3.4);
+        c.style.fill = SERIES[mi]; c.style.stroke = 'var(--surface)'; c.setAttribute('stroke-width',2);
+        svg.appendChild(c);
+      });
+    }
+
+    const ring = el('circle');
+    ring.setAttribute('r', 5.5); ring.setAttribute('fill','none');
+    ring.style.stroke = 'var(--ink)'; ring.setAttribute('stroke-width', 2);
+    ring.setAttribute('opacity', 0); svg.appendChild(ring);
+
+    const ov = el('rect');
+    ov.setAttribute('x',pad.l); ov.setAttribute('y',pad.t);
+    ov.setAttribute('width',iw); ov.setAttribute('height',ih); ov.setAttribute('fill','transparent');
+    svg.appendChild(ov);
+    cell.appendChild(svg);
+
+    const tip = document.createElement('div'); tip.className = 'tip'; cell.appendChild(tip);
+    // nearest-point layer: the pointer only has to be closest, not dead-centre
+    ov.addEventListener('pointermove', ev => {
+      const box = svg.getBoundingClientRect();
+      const sx = (ev.clientX - box.left)/box.width*W, sy = (ev.clientY - box.top)/box.height*H;
+      let best = null, bd = Infinity;
+      pts.forEach(r => {
+        const dx = X(r[I.km])-sx, dy = Y(r[I.pr])-sy, d = dx*dx+dy*dy;
+        if(d < bd){ bd = d; best = r; }
+      });
+      if(!best || bd > 900){ tip.style.opacity = 0; ring.setAttribute('opacity',0); return; }
+      ring.setAttribute('cx', X(best[I.km])); ring.setAttribute('cy', Y(best[I.pr])); ring.setAttribute('opacity',1);
+      tip.textContent = '';
+      const h = document.createElement('div'); h.className = 'th';
+      h.textContent = best[I.yr] + ' ' + M[mi]; tip.appendChild(h);
+      [['Price', money(best[I.pr])], ['Mileage', kmFmt(best[I.km])], ['Seller', best[I.priv] ? 'Private' : DATA.sellers[best[I.seller]]]]
+        .forEach(([k,v]) => {
+          const row = document.createElement('div'); row.className = 'tr';
+          const l = document.createElement('div'); l.className = 'tl'; l.textContent = k;
+          const s = document.createElement('span'); s.className = 'tv'; s.textContent = v;
+          row.append(l, s); tip.appendChild(row);
+        });
+      tip.style.opacity = 1;
+      const tw = tip.offsetWidth, px = X(best[I.km])/W*box.width;
+      tip.style.left = Math.max(4, Math.min(px + 12, box.width - tw - 4)) + 'px';
+      tip.style.top = Math.max(4, Y(best[I.pr])/H*box.height - 20) + 'px';
+    });
+    ov.addEventListener('pointerleave', () => { tip.style.opacity = 0; ring.setAttribute('opacity',0); });
+
+    host.appendChild(cell);
+  });
+}
+
+/* ---------------- tiles ---------------- */
+function renderTiles(rows){
+  const host = $('#tiles'); host.textContent = '';
+  const prices = rows.map(r => r[I.pr]);
+  const kms = rows.map(r => r[I.km]).filter(v => v != null);
+  const nowYear = YR[1];
+
+  // cross-sectional slopes
+  const byYear = new Map();
+  rows.forEach(r => (byYear.get(r[I.yr]) || byYear.set(r[I.yr], []).get(r[I.yr])).push(r[I.pr]));
+  const yrPts = [...byYear.entries()].filter(([,v]) => v.length >= 3).map(([y,v]) => [y, median(v)]);
+  const perYear = slope(yrPts);
+
+  const kmPts = rows.filter(r => r[I.km] != null).map(r => [r[I.km], r[I.pr]]);
+  const perKm = slope(kmPts);
+
+  const tiles = [
+    { k: 'Listings', v: rows.length.toLocaleString('en-CA'), n: `of ${ROWS.length.toLocaleString('en-CA')} collected` },
+    { k: 'Median price', v: prices.length ? money(median(prices)) : '—',
+      n: prices.length ? `${money(quantile(prices,.25))} – ${money(quantile(prices,.75))} middle half` : '' },
+    { k: 'Median mileage', v: kms.length ? kmFmt(median(kms)) : '—', n: `${kms.length.toLocaleString('en-CA')} with odometer` },
+    { k: 'Median age', v: rows.length ? (nowYear - median(rows.map(r => r[I.yr]))).toFixed(1) + ' yr' : '—', n: `newest year in data: ${nowYear}` },
+    { k: 'Value lost per year', v: perYear ? money(Math.abs(perYear)) : '—', n: 'slope of median price on model year' },
+    { k: 'Value lost per 10,000 km', v: perKm ? money(Math.abs(perKm*10000)) : '—', n: 'slope of price on odometer' },
+  ];
+  tiles.forEach(t => {
+    const d = document.createElement('div'); d.className = 'tile';
+    const k = document.createElement('div'); k.className = 'k'; k.textContent = t.k;
+    const v = document.createElement('div'); v.className = 'v'; v.textContent = t.v;
+    const n = document.createElement('div'); n.className = 'n'; n.textContent = t.n;
+    d.append(k, v, n); host.appendChild(d);
+  });
+}
+
+/* ---------------- tables ---------------- */
+function renderTables(rows, bins, series){
+  const host = $('#tableHost');
+  host.hidden = !state.tables;
+  $('#tableBtn').setAttribute('aria-pressed', state.tables);
+  $('#tableBtn').setAttribute('aria-expanded', state.tables);
+  $('#tableBtn').textContent = state.tables ? 'Hide tables' : 'Show tables';
+  if(!state.tables) return;
+  host.textContent = '';
+  const cfg = HIST[state.histVar];
+
+  const t1 = document.createElement('table');
+  const cap1 = document.createElement('caption');
+  cap1.textContent = 'Distribution — the histogram above, as counts.';
+  t1.appendChild(cap1);
+  const active = [...state.models].sort((a,b)=>a-b);
+  const hd = document.createElement('thead'); const hr = document.createElement('tr');
+  [cfg.title, ...active.map(i => M[i]), 'Total'].forEach(h => {
+    const th = document.createElement('th'); th.scope = 'col'; th.textContent = h; hr.appendChild(th);
+  });
+  hd.appendChild(hr); t1.appendChild(hd);
+  const tb = document.createElement('tbody');
+  bins.forEach(b => {
+    if(!b.rows.length) return;
+    const tr = document.createElement('tr');
+    const th = document.createElement('th'); th.scope = 'row';
+    th.textContent = state.histVar === 'year' ? String(b.lo) : `${cfg.fmt(b.lo)} – ${cfg.fmt(b.hi)}`;
+    tr.appendChild(th);
+    active.forEach(i => { const td = document.createElement('td'); td.textContent = b.byModel[i]; tr.appendChild(td); });
+    const td = document.createElement('td'); td.textContent = b.rows.length; tr.appendChild(td);
+    tb.appendChild(tr);
+  });
+  t1.appendChild(tb);
+
+  const t2 = document.createElement('table');
+  const cap2 = document.createElement('caption');
+  cap2.textContent = 'Median asking price by model year (n ≥ 3), with the newest-year share.';
+  t2.appendChild(cap2);
+  const hd2 = document.createElement('thead'); const hr2 = document.createElement('tr');
+  ['Model year', ...series.flatMap(s => [M[s.mi], '% of newest'])].forEach(h => {
+    const th = document.createElement('th'); th.scope = 'col'; th.textContent = h; hr2.appendChild(th);
+  });
+  hd2.appendChild(hr2); t2.appendChild(hd2);
+  const tb2 = document.createElement('tbody');
+  const years = [...new Set(series.flatMap(s => s.pts.map(p => p.x)))].sort((a,b) => b-a);
+  years.forEach(y => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th'); th.scope = 'row'; th.textContent = y; tr.appendChild(th);
+    series.forEach(s => {
+      const p = s.pts.find(p => p.x === y);
+      const base = s.pts[s.pts.length-1].med;
+      const a = document.createElement('td'); a.textContent = p ? money(p.med) : '—';
+      const b = document.createElement('td'); b.textContent = p ? (p.med/base*100).toFixed(0) + '%' : '—';
+      tr.append(a, b);
+    });
+    tb2.appendChild(tr);
+  });
+  t2.appendChild(tb2);
+
+  [t1, t2].forEach(t => { const w = document.createElement('div'); w.className = 'tablewrap'; w.appendChild(t); host.appendChild(w); });
+}
+
+/* ---------------- shortlist (shared, via serve.py) ---------------- */
+const SL = { items: [], byId: new Map(), online: null };
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e){} };
+
+function saverName(){
+  let n = lsGet('cc.name');
+  if(n == null){
+    n = (window.prompt('Your name, so the family knows who saved this car:') || '').trim().slice(0, 30);
+    lsSet('cc.name', n);
+  }
+  return n || 'someone';
+}
+
+function saveButton(f, row){
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'save';
+  const on = SL.byId.has(f.id);
+  b.setAttribute('aria-pressed', on);
+  b.textContent = on ? '★' : '☆';
+  b.setAttribute('aria-label', on ? 'Remove from shortlist' : 'Save to shortlist');
+  b.title = b.getAttribute('aria-label');
+  b.disabled = SL.online === false;
+  b.addEventListener('click', () => SL.byId.has(f.id) ? slRemove(f.id) : slSave(row));
+  return b;
+}
+
+async function slFetch(method, path, body){
+  const res = await fetch(path, {
+    method, headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  return (await res.json()).items;
+}
+
+function slApply(items, online){
+  SL.items = items; SL.online = online;
+  SL.byId = new Map(items.map(i => [i.id, i]));
+  renderShortlist();
+  renderAll(false);
+}
+
+async function slRefresh(){
+  try { slApply(await slFetch('GET', 'api/shortlist'), true); }
+  catch(e){ if(SL.online !== false) slApply([], false); }
+}
+async function slSave(row){
+  const f = rowFields(row);
+  try { slApply(await slFetch('POST', 'api/shortlist', { ...f, saved_by: saverName() }), true); }
+  catch(e){ slApply(SL.items, false); }
+}
+async function slRemove(id){
+  try { slApply(await slFetch('DELETE', 'api/shortlist/' + encodeURIComponent(id)), true); }
+  catch(e){ slApply(SL.items, false); }
+}
+
+function relTime(iso){
+  const s = (Date.now() - Date.parse(iso)) / 1000;
+  if(!(s >= 0)) return '';
+  if(s < 90) return 'just now';
+  if(s < 5400) return Math.round(s/60) + ' min ago';
+  if(s < 129600) return Math.round(s/3600) + ' h ago';
+  return Math.round(s/86400) + ' days ago';
+}
+
+function renderShortlist(){
+  const wrap = $('#slWrap'); wrap.textContent = '';
+  const note = $('#slNote');
+  note.hidden = SL.online !== false;
+  note.textContent = 'Shortlist unavailable — is serve.py running on the host computer?';
+  const items = [...SL.items].sort((a, b) => Date.parse(b.saved_at) - Date.parse(a.saved_at));
+  $('#slSub').textContent = items.length
+    ? `${items.length} saved car${items.length === 1 ? '' : 's'} · saved by anyone in the house, from any device.`
+    : 'Saved by anyone in the house, from any device.';
+  if(!items.length){
+    const e = document.createElement('div'); e.className = 'empty';
+    e.textContent = SL.online === false ? 'Shortlist is off while the server is unreachable.' : 'No saved cars yet — click ☆ on any car below.';
+    wrap.appendChild(e); return;
+  }
+  items.forEach(it => {
+    const live = BY_ID.get(it.id);
+    const f = live ? rowFields(live) : it;
+    const extra = [];
+    if(live && live[I.pr] !== it.price){
+      const d = live[I.pr] - it.price, t = document.createElement('span');
+      t.className = 'delta ' + (d < 0 ? 'under' : 'over');
+      t.textContent = (d < 0 ? 'Price dropped ' : 'Price up ') + money(Math.abs(d)) + ' since saved';
+      extra.push(t);
+    }
+    if(!live){
+      const t = document.createElement('span'); t.className = 'delta stale'; t.textContent = 'No longer listed';
+      extra.push(t);
+    }
+    const div = listingRow(f, { row: live, extra });
+    const meta = document.createElement('div'); meta.className = 'slmeta';
+    meta.textContent = `Saved by ${it.saved_by || 'someone'} · ${relTime(it.saved_at)}`;
+    const rm = document.createElement('button'); rm.type = 'button'; rm.className = 'linkbtn';
+    rm.textContent = 'Remove'; rm.addEventListener('click', () => slRemove(it.id));
+    meta.appendChild(rm);
+    div.appendChild(meta);
+    wrap.appendChild(div);
+  });
+}
+
+/* ---------------- data refresh (re-runs the pipeline on the host via serve.py) ---------------- */
+const RF = { timer: null, sawRunning: false };
+
+function paintRefresh(st){
+  const box = $('#refreshBox'), btn = $('#refreshBtn');
+  btn.hidden = false;
+  btn.disabled = st.running;
+  const tail = (st.log_tail || '').trim().split('\n').slice(-6).join('\n');
+  if(st.running){
+    RF.sawRunning = true;
+    box.hidden = false; box.className = 'refreshbox';
+    $('#refreshStep').textContent = `${st.step}…`;
+    $('#refreshNote').textContent = `step ${st.step_no} of ${st.n_steps} · started ${relTime(st.started_at)} · usually 5–10 minutes`;
+    $('#refreshLog').hidden = false; $('#refreshLog').textContent = tail;
+    return;
+  }
+  if(RF.sawRunning){
+    RF.sawRunning = false;
+    if(st.ok){
+      box.className = 'refreshbox done';
+      $('#refreshStep').textContent = 'Fresh data ready — reloading…';
+      $('#refreshNote').textContent = ''; $('#refreshLog').hidden = true;
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      box.className = 'refreshbox fail';
+      $('#refreshStep').textContent = 'Refresh failed';
+      $('#refreshNote').textContent = 'The previous data is still shown. Last lines of the log:';
+      $('#refreshLog').hidden = false; $('#refreshLog').textContent = tail;
+    }
+  } else if(st.ok && st.finished_at && Date.parse(st.finished_at) > Date.parse(meta.collected_at) + 5*60000){
+    // someone else refreshed since this page was loaded (collected_at precedes finished_at by
+    // only the model + build time, well under five minutes, on the run that produced this page)
+    box.hidden = false; box.className = 'refreshbox done';
+    $('#refreshStep').textContent = 'Newer data is available';
+    $('#refreshNote').textContent = ''; $('#refreshLog').hidden = true;
+    if(!$('#refreshReload')){
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tbtn'; b.id = 'refreshReload';
+      b.textContent = 'Reload'; b.addEventListener('click', () => location.reload());
+      box.querySelector('.rtop').appendChild(b);
+    }
+  } else if(st.ok === false && st.finished_at && !box.classList.contains('fail')){
+    // a run that failed before this page was opened: leave a quiet note, keep the log available
+    box.hidden = false; box.className = 'refreshbox fail';
+    $('#refreshStep').textContent = `Last refresh failed (${relTime(st.finished_at)})`;
+    $('#refreshNote').textContent = 'The data shown is from the previous successful run.';
+    $('#refreshLog').hidden = false; $('#refreshLog').textContent = tail;
+  }
+}
+
+async function pollRefresh(){
+  try {
+    const res = await fetch('api/refresh');
+    if(!res.ok) throw new Error(res.status);
+    const st = await res.json();
+    paintRefresh(st);
+    clearTimeout(RF.timer);
+    RF.timer = setTimeout(pollRefresh, st.running ? 3000 : 30000);
+  } catch(e){
+    $('#refreshBtn').hidden = true;    // no serve.py behind this page
+  }
+}
+
+$('#refreshBtn').addEventListener('click', async () => {
+  if(!window.confirm('Re-download every listing from AutoTrader and rebuild the page?\n\nThis takes about 5–10 minutes. Everyone on the network will see the new data when it finishes.')) return;
+  try {
+    const res = await fetch('api/refresh', { method: 'POST' });
+    paintRefresh(await res.json());
+    clearTimeout(RF.timer); RF.timer = setTimeout(pollRefresh, 3000);
+  } catch(e){
+    window.alert('Could not reach the server to start a refresh.');
+  }
+});
+
+/* ---------------- simple / advanced view ---------------- */
+function setAdvanced(on){
+  $('#advanced').hidden = !on;
+  const b = $('#advBtn');
+  b.setAttribute('aria-expanded', on);
+  b.textContent = on ? 'Hide the model details' : 'Show how the pricing model works';
+  lsSet('cc.adv', on ? '1' : '0');
+}
+$('#advBtn').addEventListener('click', () => setAdvanced($('#advanced').hidden));
+setAdvanced(lsGet('cc.adv') === '1');
+
+/* ---------------- filter state <-> URL hash ---------------- */
+const DEF = { yr: [...YR], km: [...KM], pr: [...PR] };
+const sameRange = (a, b) => a[0] === b[0] && a[1] === b[1];
+
+function stateToHash(){
+  const p = new URLSearchParams();
+  if(state.models.size !== M.length) p.set('m', [...state.models].sort((a,b)=>a-b).join('.'));
+  if(state.cond !== 'all') p.set('c', state.cond);
+  if(state.fuels.size) p.set('f', [...state.fuels].join('.'));
+  if(state.seller !== 'all') p.set('s', state.seller);
+  if(state.dts.size) p.set('d', [...state.dts].join('.'));
+  if(state.cols.size) p.set('k', [...state.cols].join('.'));
+  if(!sameRange(state.yr, DEF.yr)) p.set('y', state.yr.join('-'));
+  if(!sameRange(state.km, DEF.km)) p.set('km', state.km.join('-'));
+  if(!sameRange(state.pr, DEF.pr)) p.set('p', state.pr.join('-'));
+  if(state.sort !== 'price') p.set('sort', state.sort);
+  if(state.sortDir !== SORTS[state.sort].dir) p.set('dir', state.sortDir === 1 ? 'asc' : 'desc');
+  return p.toString();
+}
+function hashToState(){
+  const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const ints = (s, max) => s.split('.').map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < max);
+  const range = (s, dom) => {
+    const [lo, hi] = (s || '').split('-').map(Number);
+    return Number.isFinite(lo) && Number.isFinite(hi) && lo <= hi
+      ? [Math.max(dom[0], lo), Math.min(dom[1], hi)] : null;
+  };
+  if(p.has('m')){ const v = ints(p.get('m'), M.length); if(v.length) state.models = new Set(v); }
+  if(['used','new'].includes(p.get('c'))) state.cond = p.get('c');
+  if(p.has('f')) state.fuels = new Set(ints(p.get('f'), DATA.fuels.length));
+  if(['dealer','private'].includes(p.get('s'))) state.seller = p.get('s');
+  if(p.has('d')) state.dts = new Set(ints(p.get('d'), DATA.drivetrains.length));
+  if(p.has('k')) state.cols = new Set(ints(p.get('k'), DATA.colours.length));
+  const y = range(p.get('y'), YR), km = range(p.get('km'), KM), pr = range(p.get('p'), PR);
+  if(y) state.yr = y; if(km) state.km = km; if(pr) state.pr = pr;
+  if(SORTS[p.get('sort')]){ state.sort = p.get('sort'); state.sortDir = SORTS[state.sort].dir; }
+  if(['asc','desc'].includes(p.get('dir'))) state.sortDir = p.get('dir') === 'asc' ? 1 : -1;
+}
+function syncHash(){
+  const h = stateToHash();
+  if(h !== location.hash.replace(/^#/, '')) history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
+}
+
+async function copyLink(btn){
+  const url = location.href;
+  let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch(e){}
+  if(!ok){
+    // http origins on other devices may refuse the clipboard API: fall back to a selectable prompt
+    window.prompt('Copy this link:', url); return;
+  }
+  const t = btn.textContent; btn.textContent = 'Copied'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = t; btn.classList.remove('copied'); }, 1500);
+}
+$('#copyBtn').addEventListener('click', e => copyLink(e.currentTarget));
+$('#stickyCopy').addEventListener('click', e => copyLink(e.currentTarget));
+
+/* ---------------- sticky filter summary ---------------- */
+function filterSummary(){
+  const parts = [];
+  parts.push(state.models.size === M.length ? 'All models' : [...state.models].sort((a,b)=>a-b).map(i => M[i]).join(', '));
+  if(state.cond !== 'all') parts.push(state.cond === 'new' ? 'New' : 'Used');
+  if(state.seller !== 'all') parts.push(state.seller === 'private' ? 'Private sellers' : 'Dealers');
+  if(state.fuels.size) parts.push(state.fuels.size === 1 ? DATA.fuels[[...state.fuels][0]] : `${state.fuels.size} powertrains`);
+  if(state.dts.size) parts.push([...state.dts].map(i => DATA.drivetrains[i]).join('/'));
+  if(state.cols.size) parts.push(state.cols.size === 1 ? DATA.colours[[...state.cols][0]] : `${state.cols.size} colours`);
+  if(!sameRange(state.yr, DEF.yr)) parts.push(state.yr[0] === state.yr[1] ? String(state.yr[0]) : `${state.yr[0]}–${state.yr[1]}`);
+  if(!sameRange(state.km, DEF.km)) parts.push(state.km[0] === KM[0] ? `under ${kmK(state.km[1])} km` : `${kmK(state.km[0])}–${kmK(state.km[1])} km`);
+  if(!sameRange(state.pr, DEF.pr)) parts.push(state.pr[0] === PR[0] ? `under ${moneyK(state.pr[1])}` : `${moneyK(state.pr[0])}–${moneyK(state.pr[1])}`);
+  return parts;
+}
+function renderSticky(n){
+  const s = $('#stickySum'); s.textContent = '';
+  const strong = document.createElement('strong');
+  strong.textContent = `${n.toLocaleString('en-CA')} car${n === 1 ? '' : 's'}`;
+  s.append(strong, document.createTextNode(' · ' + filterSummary().join(' · ')));
+}
+$('#stickyEdit').addEventListener('click', () => $('.filters').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+new IntersectionObserver(([e]) => { $('#stickybar').hidden = e.isIntersecting; }, { threshold: 0 })
+  .observe($('.filters'));
+
+/* ---------------- orchestration ---------------- */
+let paintYr, paintKm, paintPr;
+function renderAll(rebuildChips = true){
+  if(rebuildChips) buildChips();
+  const rows = filtered();
+  renderTiles(rows);
+  const bins = renderHist(rows);
+  renderList(bins, rows);
+  const series = renderDep(rows);
+  renderSmall(rows);
+  renderTables(rows, bins, series);
+  renderSticky(rows.length);
+  syncHash();
+  $('#histSub').textContent = state.bin != null
+    ? 'Showing one bar — click it again to clear the selection.'
+    : 'Click a bar to list the vehicles inside it.';
+}
+
+/* segmented controls */
+function seg(sel, key, after){
+  $(sel).querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    state[key] = b.dataset.v || b.dataset.s || b.dataset.m;
+    $(sel).querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', o === b));
+    if(after) after();
+    renderAll();
+  }));
+}
+seg('#histVar', 'histVar', () => state.bin = null);
+seg('#depMode', 'depMode');
+
+$('#sortSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.s;
+  if(state.sort === k) state.sortDir *= -1;        // same column again: flip direction
+  else { state.sort = k; state.sortDir = SORTS[k].dir; }
+  renderAll();
+}));
+
+$('#tableBtn').addEventListener('click', () => { state.tables = !state.tables; renderAll(); });
+function resetFilters(){
+  state.models = new Set(M.map((_,i)=>i));
+  state.cond = 'all'; state.fuels.clear(); state.seller = 'all';
+  state.dts.clear(); state.cols.clear();
+  state.yr = [...YR]; state.km = [...KM]; state.pr = [...PR];
+  state.bin = null; state.sort = 'price'; state.sortDir = 1;
+  buildSliders();
+  renderAll();
+}
+$('#resetBtn').addEventListener('click', resetFilters);
+$('#stickyReset').addEventListener('click', resetFilters);
+
+function buildSliders(){
+  paintYr = dualSlider($('#yrSlider'), YR, 'yr', v => String(v), $('#yrLo'), $('#yrHi'), 1);
+  paintKm = dualSlider($('#kmSlider'), KM, 'km', v => v >= 1000 ? kmK(v) + ' km' : v + ' km', $('#kmLo'), $('#kmHi'), 5000);
+  paintPr = dualSlider($('#prSlider'), PR, 'pr', moneyK, $('#prLo'), $('#prHi'), 1000);
+}
+
+/* meta */
+const meta = DATA.meta;
+$('#metaLoc').textContent = meta.location + ' · ' + meta.radius_km + ' km';
+$('#metaN').textContent = ROWS.length.toLocaleString('en-CA');
+$('#metaDate').textContent = new Date(meta.collected_at).toLocaleDateString('en-CA', {month:'short', day:'numeric'});
+$('#footMeta').textContent =
+  `${ROWS.length.toLocaleString('en-CA')} listings collected from AutoTrader.ca on ${new Date(meta.collected_at).toLocaleDateString('en-CA', {year:'numeric', month:'long', day:'numeric'})}, within ${meta.radius_km} km of ${meta.location}.`;
+$('#footExcl').textContent =
+  `${meta.excluded_price_on_request} listings were left out for having no usable price — AutoTrader encodes “price on request” as $1, and anything under ${money(meta.price_floor)} is a lease or rental payment rather than a sale price — along with ${meta.excluded_no_year} with no model year. `
+  + `The fitted model is estimated on the ${PM.n_used.toLocaleString('en-CA')} used listings that carry a price, a model year and an odometer reading; new vehicles are excluded from it because their asking prices track MSRP rather than the used market.`;
+
+hashToState();
+buildSliders();
+renderAll();
+renderShortlist();
+slRefresh();
+setInterval(slRefresh, 20000);
+pollRefresh();
+window.addEventListener('hashchange', () => { hashToState(); buildSliders(); renderAll(); });
+
+/* ================================================================
+   PRICE MODEL — restricted cubic splines on age and log-mileage
+   ================================================================ */
+const RAMP = ['--r0','--r1','--r2','--r3','--r4','--r5','--r6'].map(v=>`var(${v})`);
+
+function rcsB(x, t){
+  const k = t.length, den = (t[k-1]-t[0])**2, cube = u => u>0 ? u*u*u : 0, out = [x];
+  for(let j=0;j<k-2;j++)
+    out.push((cube(x-t[j])
+      - cube(x-t[k-2])*(t[k-1]-t[j])/(t[k-1]-t[k-2])
+      + cube(x-t[k-1])*(t[k-2]-t[j])/(t[k-1]-t[k-2])) / den);
+  return out;
+}
+const ELECTRIFIED = new Set(['hybrid','plugin','electric']);
+function predict(o){
+  const b = PM.beta, ix = PM.idx, v = new Array(b.length).fill(0);
+  v[ix.int[0]] = 1;
+  rcsB(o.age, PM.age_knots).forEach((z,i) => v[ix.age[i]] = z);
+  rcsB(Math.log(o.km + PM.km_offset), PM.km_knots).forEach((z,i) => v[ix.km[i]] = z);
+  if(o.m > 0){ v[ix.md[o.m-1]] = 1; v[ix.mdage[o.m-1]] = o.age; }
+  const fi = PM.fuel_cats.indexOf(o.fuel);
+  if(fi >= 0) v[ix.fu[fi]] = 1;
+  if(ELECTRIFIED.has(o.fuel)) v[ix.hyage[0]] = o.age;
+  v[ix.pv[0]] = o.priv ? 1 : 0;
+  const ri = PM.regions.indexOf(o.region);
+  if(ri > 0) v[ix.rg[ri-1]] = 1;
+  const di = PM.drivetrains.indexOf(o.dt ?? 'AWD');
+  if(di > 0) v[ix.dt[di-1]] = 1;
+  const ci = PM.colours.indexOf(o.col ?? 'Black');
+  if(ci >= 0) v[ix.co[ci]] = 1;
+  let lp = 0; for(let i=0;i<b.length;i++) lp += v[i]*b[i];
+  return { p: Math.exp(lp)*PM.smear,
+           lo: Math.exp(lp - 1.96*PM.sigma)*PM.smear,
+           hi: Math.exp(lp + 1.96*PM.sigma)*PM.smear };
+}
+
+/* ---------------- generic line chart (used by the partial-effect pair) --------- */
+function lineChart(svg, box, tip, o){
+  svg.textContent = '';
+  const W = 560, H = 320, pad = { t: 12, r: 92, b: 44, l: 60 };
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const iw = W-pad.l-pad.r, ih = H-pad.t-pad.b;
+  const xs = o.xs, x0 = xs[0], x1 = xs[xs.length-1];
+  const all = o.series.flatMap(s => s.ys);
+  const yTop = Math.ceil(Math.max(...all)/5000)*5000, yBot = 0;
+  const X = v => pad.l + (v-x0)/(x1-x0)*iw;
+  const Y = v => pad.t + ih - (v-yBot)/(yTop-yBot)*ih;
+
+  const yStep = niceStep(yTop-yBot, 5);
+  for(let v=yBot; v<=yTop+1e-6; v+=yStep){
+    const l = el('line','gridline');
+    l.setAttribute('x1',pad.l); l.setAttribute('x2',pad.l+iw); l.setAttribute('y1',Y(v)); l.setAttribute('y2',Y(v));
+    svg.appendChild(l);
+    const t = el('text','tick');
+    t.setAttribute('x',pad.l-9); t.setAttribute('y',Y(v)+4); t.setAttribute('text-anchor','end');
+    t.textContent = moneyK(v); svg.appendChild(t);
+  }
+  const ax = el('line','axisline');
+  ax.setAttribute('x1',pad.l); ax.setAttribute('x2',pad.l+iw);
+  ax.setAttribute('y1',pad.t+ih); ax.setAttribute('y2',pad.t+ih); svg.appendChild(ax);
+  o.xticks.forEach(v => {
+    const t = el('text','tick');
+    t.setAttribute('x',X(v)); t.setAttribute('y',pad.t+ih+17); t.setAttribute('text-anchor','middle');
+    t.textContent = o.xfmt(v); svg.appendChild(t);
+  });
+  const at = el('text','axistitle');
+  at.setAttribute('x',pad.l+iw/2); at.setAttribute('y',H-6); at.setAttribute('text-anchor','middle');
+  at.textContent = o.xtitle; svg.appendChild(at);
+  const yt = el('text','axistitle');
+  yt.setAttribute('transform',`translate(14,${pad.t+ih/2}) rotate(-90)`); yt.setAttribute('text-anchor','middle');
+  yt.textContent = 'Modelled price'; svg.appendChild(yt);
+
+  const labels = [];
+  o.series.forEach(s => {
+    const path = el('path');
+    path.setAttribute('d', s.ys.map((y,i) => (i?'L':'M')+X(xs[i]).toFixed(1)+' '+Y(y).toFixed(1)).join(' '));
+    path.setAttribute('fill','none'); path.style.stroke = SERIES[s.mi];
+    path.setAttribute('stroke-width',2); path.setAttribute('stroke-linejoin','round');
+    svg.appendChild(path);
+    const yEnd = Y(s.ys[s.ys.length-1]);
+    labels.push({ y: yEnd, draw: yy => {
+      if(Math.abs(yy - yEnd) > 2){          // leader line back to the series end
+        const ld = el('path');
+        ld.setAttribute('d', `M ${X(x1)} ${yEnd} L ${X(x1)+5} ${yy-4}`);
+        ld.setAttribute('fill','none'); ld.style.stroke = SERIES[s.mi];
+        ld.setAttribute('stroke-width',1); ld.setAttribute('opacity',.5); svg.appendChild(ld);
+      }
+      const t = el('text','dlabel');
+      t.setAttribute('x', X(x1)+9); t.setAttribute('y', yy);
+      t.style.fill = SERIES[s.mi]; t.textContent = M[s.mi]; svg.appendChild(t);
+    }});
+  });
+  spreadLabels(labels, 15, pad.t + 10, pad.t + ih);
+
+  const cross = el('line');
+  cross.style.stroke = 'var(--axis)'; cross.setAttribute('stroke-width',1);
+  cross.setAttribute('y1',pad.t); cross.setAttribute('y2',pad.t+ih); cross.setAttribute('opacity',0);
+  svg.appendChild(cross);
+  const ov = el('rect');
+  ov.setAttribute('x',pad.l); ov.setAttribute('y',pad.t); ov.setAttribute('width',iw);
+  ov.setAttribute('height',ih); ov.setAttribute('fill','transparent'); svg.appendChild(ov);
+  ov.addEventListener('pointermove', ev => {
+    const bx = box.getBoundingClientRect();
+    const sx = (ev.clientX-bx.left)/bx.width*W;
+    let bi = 0;
+    xs.forEach((v,i) => { if(Math.abs(X(v)-sx) < Math.abs(X(xs[bi])-sx)) bi = i; });
+    cross.setAttribute('x1',X(xs[bi])); cross.setAttribute('x2',X(xs[bi])); cross.setAttribute('opacity',1);
+    tip.textContent = '';
+    const h = document.createElement('div'); h.className='th'; h.textContent = o.tipTitle(xs[bi]); tip.appendChild(h);
+    o.series.forEach(s => {
+      const row = document.createElement('div'); row.className='tr';
+      const l = document.createElement('div'); l.className='tl';
+      const k = document.createElement('span'); k.className='tk'; k.style.background = SERIES[s.mi];
+      l.append(k, document.createTextNode(M[s.mi]));
+      const val = document.createElement('span'); val.className='tv'; val.textContent = money(s.ys[bi]);
+      row.append(l,val); tip.appendChild(row);
+    });
+    tip.style.opacity = 1;
+    const tw = tip.offsetWidth, px = X(xs[bi])/W*bx.width;
+    tip.style.left = Math.max(4, Math.min(px+12, bx.width-tw-4))+'px';
+    tip.style.top = '4px';
+  });
+  ov.addEventListener('pointerleave', () => { tip.style.opacity=0; cross.setAttribute('opacity',0); });
+}
+
+/* ---------------- model-fit section ---------------- */
+function renderModelSection(){
+  $('#mCorr').textContent = PM.corr_age_km.toFixed(2);
+  const e = PM.effects.marginal;
+  const share = Math.abs(e.per_year) / (Math.abs(e.per_year) + Math.abs(e.per_10k_km * PM.annual_km/10000)) * 100;
+
+  const co = $('#mCallouts'); co.textContent = '';
+  [
+    { k: 'One more year, same odometer', v: moneySigned(e.per_year), n: 'the pure age effect — warranty, styling, market taste' },
+    { k: 'Ten thousand more km, same year', v: moneySigned(e.per_10k_km), n: 'the pure wear effect, at the median car' },
+    { k: 'One more year of typical use', v: moneySigned(e.confounded), n: 'age and the ~' + Math.round(PM.annual_km/1000) + 'k km that come with it — what a median-by-year curve reports' },
+    { k: 'Typical prediction error', v: '±' + PM.cv_mape.toFixed(1) + '%', n: 'cross-validated, vs ±' + PM.baseline.mape.toFixed(1) + '% for median-by-year' },
+  ].forEach(t => {
+    const d = document.createElement('div'); d.className='callout';
+    const k = document.createElement('div'); k.className='k'; k.textContent = t.k;
+    const v = document.createElement('div'); v.className='v' + (t.v.startsWith('\u2212') ? ' neg' : ''); v.textContent = t.v;
+    const n = document.createElement('div'); n.className='n'; n.textContent = t.n;
+    d.append(k,v,n); co.appendChild(d);
+  });
+
+  $('#mSplit').textContent =
+    `Of the ${money(Math.abs(e.confounded))} a typical car sheds in a year, about ${Math.round(share)}% is age itself and `
+    + `${Math.round(100-share)}% is the ${Math.round(PM.annual_km/1000)},000 km driven in that year. Two cars of the same model year can sit `
+    + `${money(Math.abs(predict({age:PM.median_age,km:40000,m:0,fuel:'gas',priv:0,region:'Montréal Island',dt:'AWD',col:'Black'}).p - predict({age:PM.median_age,km:140000,m:0,fuel:'gas',priv:0,region:'Montréal Island',dt:'AWD',col:'Black'}).p))} apart on odometer alone.`;
+
+  $('#mAgeSub').textContent = 'odometer held at ' + kmFmt(PM.median_km);
+  $('#mKmSub').textContent  = 'age held at ' + PM.median_age.toFixed(0) + ' years';
+
+  const mkSeries = key => M.map((nm,i) => ({ mi: i, ys: PM.partial[key][nm] })).filter(s => s.ys);
+  lineChart($('#paSvg'), $('#paBox'), $('#paTip'), {
+    xs: PM.partial.age_grid, series: mkSeries('age'),
+    xticks: [0,3,6,9,12,15], xfmt: v => v + 'y', xtitle: 'Age (years)',
+    tipTitle: v => v.toFixed(1) + ' years old, ' + kmFmt(PM.median_km),
+  });
+  lineChart($('#pkSvg'), $('#pkBox'), $('#pkTip'), {
+    xs: PM.partial.km_grid, series: mkSeries('km'),
+    xticks: [0,50000,100000,150000,200000,250000], xfmt: kmK, xtitle: 'Odometer (km)',
+    tipTitle: v => kmK(v) + ' km at ' + PM.median_age.toFixed(0) + ' years old',
+  });
+
+  const lg = $('#pLegend'); lg.textContent = '';
+  M.forEach((nm,i) => {
+    const d = document.createElement('div'); d.className='li';
+    const sw = document.createElement('span'); sw.className='swl'; sw.style.background = SERIES[i];
+    d.append(sw, document.createTextNode(nm)); lg.appendChild(d);
+  });
+
+  const t = $('#specTable');
+  [...t.querySelectorAll('thead,tbody')].forEach(n => n.remove());
+  const hd = document.createElement('thead'), hr = document.createElement('tr');
+  ['Specification','CV RMSE','CV mean error','R² (log price)'].forEach(h => {
+    const th = document.createElement('th'); th.scope='col'; th.textContent=h; hr.appendChild(th);
+  });
+  hd.appendChild(hr); t.appendChild(hd);
+  const tb = document.createElement('tbody');
+  const rows = [{ name:'Median by model + year (the previous approach)', rmse:PM.baseline.rmse, mape:PM.baseline.mape, r2:null }, ...PM.specs];
+  rows.forEach((r,i) => {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th'); th.scope='row'; th.textContent = r.name; tr.appendChild(th);
+    [money(r.rmse), r.mape.toFixed(1)+'%', r.r2 == null ? '—' : r.r2.toFixed(3)].forEach(v => {
+      const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+    });
+    if(i === rows.length-1) tr.style.fontWeight = 600;
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+
+/* ---------------- predictor ---------------- */
+const pstate = { m:0, year:PM.base_year-4, km:Math.round(PM.median_km/1000)*1000, fuel:'gas', priv:0, region:'Montréal Island', dt:'AWD', col:'Black' };
+function renderPredictor(){
+  const g = $('#predGrid');
+  if(!g.dataset.built){
+    const mk = (label, node) => {
+      const f = document.createElement('div'); f.className='field';
+      const l = document.createElement('label'); l.textContent = label;
+      const id = 'pf_' + label.replace(/\W/g,''); node.id = id; l.htmlFor = id;
+      f.append(l, node); g.appendChild(f); return node;
+    };
+    const sel = opts => {
+      const s = document.createElement('select');
+      opts.forEach(([v,t]) => { const o = document.createElement('option'); o.value=v; o.textContent=t; s.appendChild(o); });
+      return s;
+    };
+    const years = []; for(let y=PM.base_year; y>=PM.base_year-15; y--) years.push([y,String(y)]);
+    mk('Model', sel(M.map((n,i)=>[i,n]))).addEventListener('change', e => { pstate.m = +e.target.value; renderPredictor(); });
+    mk('Model year', sel(years)).addEventListener('change', e => { pstate.year = +e.target.value; renderPredictor(); });
+    const num = document.createElement('input');
+    num.type='number'; num.min=0; num.max=400000; num.step=5000;
+    mk('Odometer (km)', num).addEventListener('input', e => { pstate.km = Math.max(0, +e.target.value||0); renderPredictor(); });
+    mk('Powertrain', sel([['gas','Gasoline'],['hybrid','Hybrid'],['electric','Electric / plug-in']]))
+      .addEventListener('change', e => { pstate.fuel = e.target.value; renderPredictor(); });
+    mk('Seller', sel([[0,'Dealer'],[1,'Private']])).addEventListener('change', e => { pstate.priv = +e.target.value; renderPredictor(); });
+    mk('Region', sel(PM.regions.map(r=>[r,r]))).addEventListener('change', e => { pstate.region = e.target.value; renderPredictor(); });
+    mk('Drivetrain', sel(PM.drivetrains.filter(d=>d!=='Unknown').map(d=>[d,d])))
+      .addEventListener('change', e => { pstate.dt = e.target.value; renderPredictor(); });
+    mk('Colour', sel(PM.colour_levels.filter(c=>c!=='Unknown').map(c=>[c,c])))
+      .addEventListener('change', e => { pstate.col = e.target.value; renderPredictor(); });
+    g.dataset.built = '1';
+    g.querySelectorAll('select')[0].value = pstate.m;
+    g.querySelectorAll('select')[1].value = pstate.year;
+    num.value = pstate.km;
+  }
+  const age = PM.base_year - pstate.year;
+  const r = predict({ age, km: pstate.km, m: pstate.m, fuel: pstate.fuel, priv: pstate.priv, region: pstate.region, dt: pstate.dt, col: pstate.col });
+  $('#predV').textContent = money(r.p);
+  $('#predR').textContent = `95% of comparable listings fall between ${money(r.lo)} and ${money(r.hi)}`;
+  const comp = ROWS.filter(x => x[I.m]===pstate.m && x[I.yr]===pstate.year && x[I.isNew]===0).length;
+  $('#predN').textContent = age === 0
+    ? 'At age 0 the model is extrapolating past its used-car data — treat this as indicative.'
+    : `${comp} used ${M[pstate.m]}${comp===1?'':'s'} of this model year are in the data.`;
+}
+
+/* ---------------- adjusted effects: dot & whisker ---------------- */
+function renderEffects(){
+  const E = PM.effects;
+  const items = [
+    ...E.fuel.map(f => ({ label: f.name, ...f, grp: 'Powertrain' })),
+    { label: 'Each year of age, if electrified', pct: E.electrified_age.pct, lo: E.electrified_age.lo, hi: E.electrified_age.hi, n: null, grp: 'Powertrain' },
+    ...E.drivetrain.map(d => ({ label: d.name === 'Unknown' ? 'Not stated' : d.name, ...d, grp: 'Drivetrain (vs AWD)' })),
+    { label: 'Private seller', ...E.private, grp: 'Seller' },
+    ...E.colour.map(c => ({ label: c.name === 'Unknown' ? 'Not stated' : c.name, ...c, grp: 'Colour (vs black)' })),
+    ...E.region.map(r => ({ label: r.name, ...r, grp: 'Region (vs Montréal Island)' })),
+  ];
+  const svg = $('#dwSvg'), tip = $('#dwTip'); svg.textContent = '';
+  const rowH = 26, padT = 26, padB = 34, padL = 250, padR = 24, W = 900, GRP = 12;
+  const grpBreaks = items.filter((it,i) => i > 0 && it.grp !== items[i-1].grp).length;
+  const H = padT + items.length*rowH + grpBreaks*GRP + padB;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const iw = W - padL - padR;
+  const lim = Math.max(8, ...items.map(i => Math.max(Math.abs(i.lo), Math.abs(i.hi)))) * 1.08;
+  const X = v => padL + (v + lim)/(2*lim)*iw;
+
+  const step = niceStep(2*lim, 6);
+  for(let v = -Math.ceil(lim/step)*step; v <= lim; v += step){
+    if(X(v) < padL - 1 || X(v) > padL+iw+1) continue;
+    const l = el('line', v === 0 ? 'axisline' : 'gridline');
+    l.setAttribute('x1',X(v)); l.setAttribute('x2',X(v)); l.setAttribute('y1',padT-8); l.setAttribute('y2',H-padB+4);
+    svg.appendChild(l);
+    const t = el('text','tick');
+    t.setAttribute('x',X(v)); t.setAttribute('y',H-padB+20); t.setAttribute('text-anchor','middle');
+    t.textContent = (v>0?'+':'') + Math.round(v) + '%'; svg.appendChild(t);
+  }
+  let lastGrp = null, gy = 0;
+  items.forEach((it,i) => {
+    if(i > 0 && it.grp !== items[i-1].grp) gy += GRP;
+    const y = padT + i*rowH + gy + rowH/2;
+    if(it.grp !== lastGrp){
+      const g = el('text','axistitle');
+      g.setAttribute('x', 10); g.setAttribute('y', y-11); g.textContent = it.grp;
+      svg.appendChild(g); lastGrp = it.grp;
+    }
+    const lb = el('text','tick');
+    lb.setAttribute('x', padL-14); lb.setAttribute('y', y+4); lb.setAttribute('text-anchor','end');
+    lb.style.fill = 'var(--ink-2)'; lb.setAttribute('font-size','12.5');
+    lb.textContent = it.label + (it.n ? ` (n=${it.n})` : '');
+    svg.appendChild(lb);
+
+    const wk = el('line');
+    wk.setAttribute('x1',X(it.lo)); wk.setAttribute('x2',X(it.hi));
+    wk.setAttribute('y1',y); wk.setAttribute('y2',y);
+    wk.style.stroke = SERIES[0]; wk.setAttribute('stroke-width',2); wk.setAttribute('stroke-linecap','round');
+    wk.setAttribute('opacity', .45); svg.appendChild(wk);
+    const dot = el('circle');
+    dot.setAttribute('cx',X(it.pct)); dot.setAttribute('cy',y); dot.setAttribute('r',4.5);
+    dot.style.fill = SERIES[0]; dot.style.stroke = 'var(--surface)'; dot.setAttribute('stroke-width',2);
+    svg.appendChild(dot);
+    const val = el('text','dlabel');
+    const right = X(it.hi) + 8;
+    val.setAttribute('x', right); val.setAttribute('y', y+4);
+    val.style.fill = 'var(--ink-2)';
+    val.textContent = (it.pct>=0?'+':'') + it.pct.toFixed(1) + '%';
+    svg.appendChild(val);
+
+    const hit = el('rect');
+    hit.setAttribute('x',padL); hit.setAttribute('y',y-rowH/2); hit.setAttribute('width',iw);
+    hit.setAttribute('height',rowH); hit.setAttribute('fill','transparent');
+    hit.setAttribute('tabindex','0');
+    hit.setAttribute('aria-label', `${it.label}: ${it.pct.toFixed(1)} percent, 95% interval ${it.lo.toFixed(1)} to ${it.hi.toFixed(1)}`);
+    const show = () => {
+      tip.textContent = '';
+      const h = document.createElement('div'); h.className='th'; h.textContent = it.label; tip.appendChild(h);
+      [['Effect',(it.pct>=0?'+':'')+it.pct.toFixed(1)+'%'],
+       ['95% interval',`${it.lo.toFixed(1)}% to ${it.hi.toFixed(1)}%`]].forEach(([k,v]) => {
+        const row = document.createElement('div'); row.className='tr';
+        const l = document.createElement('div'); l.className='tl'; l.textContent=k;
+        const s2 = document.createElement('span'); s2.className='tv'; s2.textContent=v;
+        row.append(l,s2); tip.appendChild(row);
+      });
+      tip.style.opacity = 1;
+      const bx = $('#dwBox').getBoundingClientRect();
+      tip.style.left = Math.min(bx.width - tip.offsetWidth - 4, X(it.pct)/W*bx.width) + 'px';
+      tip.style.top = Math.max(2, (y/H)*bx.height - 64) + 'px';
+    };
+    hit.addEventListener('pointerenter', show); hit.addEventListener('focus', show);
+    hit.addEventListener('pointerleave', () => tip.style.opacity=0);
+    hit.addEventListener('blur', () => tip.style.opacity=0);
+    svg.appendChild(hit);
+  });
+
+  const hyb = PM.effects.fuel.find(f => f.name === 'Hybrid');
+  const priv = PM.effects.private;
+  const regs = PM.effects.region.filter(r => r.name !== 'Ottawa (ON)' && r.name !== 'Other');
+  const spread = Math.max(...regs.map(r=>r.pct)) - Math.min(...regs.map(r=>r.pct));
+  const fwd = PM.effects.drivetrain.find(d => d.name === 'FWD');
+  const cols = PM.effects.colour.filter(c => c.name !== 'Unknown' && c.n >= 100);
+  const colSpread = Math.max(...cols.map(c=>c.pct)) - Math.min(...cols.map(c=>c.pct));
+  $('#dwNote').textContent =
+    `Front-wheel drive costs ${Math.abs(fwd.pct).toFixed(0)}% less than the same car with all-wheel drive — the largest single `
+    + `adjustment here after powertrain, and no surprise in a city that salts its roads five months a year. `
+    + `A hybrid commands ${hyb.pct.toFixed(0)}% more than the same car with a gas engine, and that premium fades by only `
+    + `${Math.abs(PM.effects.electrified_age.pct).toFixed(1)}% a year — it holds its value, it does not just cost more up front. `
+    + `Two things turn out not to matter. The private-seller discount ${priv.pct >= 0 ? 'does not exist' : 'is ' + Math.abs(priv.pct).toFixed(0) + '%'} `
+    + `(${priv.pct>=0?'+':''}${priv.pct.toFixed(1)}%, interval ${priv.lo.toFixed(0)}% to ${priv.hi.toFixed(0)}%): the cheaper private listings `
+    + `are cheaper because the cars are older and harder-driven, not because the seller is. And colour is worth almost nothing — `
+    + `every common colour sits within ${colSpread.toFixed(1)} points of black, as does every region within `
+    + `${spread.toFixed(1)} points of the island.`;
+}
+
+/* ---------------- sweet spot heatmaps ---------------- */
+const ss = { ann: PM.sweet_assumptions.annual_km, base: PM.sweet_assumptions.maint_base,
+             rate: PM.sweet_assumptions.maint_rate, life: PM.sweet_assumptions.life_km };
+function renderSweet(){
+  $('#ssKmV').textContent   = Math.round(ss.ann/1000) + 'k km';
+  $('#ssBaseV').textContent = money(ss.base);
+  $('#ssRateV').textContent = money(ss.rate) + '/yr';
+  $('#ssLifeV').textContent = Math.round(ss.life/1000) + 'k km';
+
+  const LIFE_YR = PM.sweet_assumptions.life_yr;
+  const cells = {}, all = [];
+  M.forEach(nm => {
+    cells[nm] = PM.sweet[nm].grid.map(c => {
+      const rem = Math.min(LIFE_YR - c.age, (ss.life - c.km)/ss.ann);
+      if(rem < 2) return null;
+      const upkeep = rem*ss.base + ss.rate*(c.age*rem + rem*(rem-1)/2);
+      const cpy = (c.price + upkeep)/rem;
+      all.push(cpy);
+      return { ...c, rem, cpy };
+    }).filter(Boolean);
+  });
+  const lo = Math.min(...all), hi = Math.max(...all);
+  const bucket = v => Math.max(0, Math.min(6, 6 - Math.floor((v-lo)/(hi-lo+1e-9)*6.999)));
+
+  const host = $('#heatWrap'); host.textContent = '';
+  M.forEach((nm, mi) => {
+    const list = cells[nm];
+    const best = list.reduce((a,b) => b.cpy < a.cpy ? b : a, list[0]);
+    const cell = document.createElement('div'); cell.className='heatcell';
+    const ttl = document.createElement('div'); ttl.className='smtitle';
+    const dot = document.createElement('span'); dot.className='dot'; dot.style.background = SERIES[mi];
+    ttl.append(dot, document.createTextNode(nm)); cell.appendChild(ttl);
+
+    const W = 320, H = 260, pad = { t: 8, r: 10, b: 40, l: 46 };
+    const ages = [...new Set(list.map(c=>c.age))].sort((a,b)=>a-b);
+    const kms  = [...new Set(list.map(c=>c.km))].sort((a,b)=>a-b);
+    const cw = (W-pad.l-pad.r)/ages.length, ch = (H-pad.t-pad.b)/kms.length;
+    const svg = el('svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('role','img');
+    svg.setAttribute('aria-label', `${nm}: cost per remaining year by age and odometer; cheapest at ${best.age} years and ${best.km} km`);
+    list.forEach(c => {
+      const x = pad.l + ages.indexOf(c.age)*cw;
+      const y = pad.t + (kms.length-1 - kms.indexOf(c.km))*ch;
+      const r = el('rect');
+      r.setAttribute('x',x+1); r.setAttribute('y',y+1);
+      r.setAttribute('width',Math.max(1,cw-2)); r.setAttribute('height',Math.max(1,ch-2));
+      r.setAttribute('rx',1.5);
+      r.style.fill = RAMP[bucket(c.cpy)];
+      svg.appendChild(r);
+      if(c === best){
+        const ring = el('rect');
+        ring.setAttribute('x',x); ring.setAttribute('y',y);
+        ring.setAttribute('width',cw); ring.setAttribute('height',ch); ring.setAttribute('rx',2);
+        ring.setAttribute('fill','none'); ring.style.stroke = 'var(--ink)'; ring.setAttribute('stroke-width',2);
+        svg.appendChild(ring);
+      }
+    });
+    [0,3,6,9,12,15].forEach(a => {
+      if(!ages.includes(a)) return;
+      const t = el('text','tick');
+      t.setAttribute('x', pad.l + ages.indexOf(a)*cw + cw/2);
+      t.setAttribute('y', H-pad.b+16); t.setAttribute('text-anchor','middle');
+      t.textContent = a + 'y'; svg.appendChild(t);
+    });
+    [0,50000,100000,150000,200000,250000].forEach(k => {
+      if(!kms.includes(k)) return;
+      const t = el('text','tick');
+      t.setAttribute('x', pad.l-7);
+      t.setAttribute('y', pad.t + (kms.length-1-kms.indexOf(k))*ch + ch/2 + 4);
+      t.setAttribute('text-anchor','end'); t.textContent = kmK(k); svg.appendChild(t);
+    });
+    const at = el('text','axistitle');
+    at.setAttribute('x',pad.l+(W-pad.l-pad.r)/2); at.setAttribute('y',H-4); at.setAttribute('text-anchor','middle');
+    at.textContent = 'Age'; svg.appendChild(at);
+    const yt = el('text','axistitle');
+    yt.setAttribute('transform',`translate(12,${pad.t+(H-pad.t-pad.b)/2}) rotate(-90)`);
+    yt.setAttribute('text-anchor','middle'); yt.textContent = 'Odometer'; svg.appendChild(yt);
+
+    const tip = document.createElement('div'); tip.className='tip';
+    const ov = el('rect');
+    ov.setAttribute('x',pad.l); ov.setAttribute('y',pad.t);
+    ov.setAttribute('width',W-pad.l-pad.r); ov.setAttribute('height',H-pad.t-pad.b);
+    ov.setAttribute('fill','transparent'); svg.appendChild(ov);
+    ov.addEventListener('pointermove', ev => {
+      const bx = svg.getBoundingClientRect();
+      const sx = (ev.clientX-bx.left)/bx.width*W, sy = (ev.clientY-bx.top)/bx.height*H;
+      const ai = Math.floor((sx-pad.l)/cw), ki = kms.length-1 - Math.floor((sy-pad.t)/ch);
+      const c = list.find(c => c.age===ages[ai] && c.km===kms[ki]);
+      if(!c){ tip.style.opacity=0; return; }
+      tip.textContent='';
+      const h = document.createElement('div'); h.className='th';
+      h.textContent = `${c.age} years, ${kmFmt(c.km)}`; tip.appendChild(h);
+      [['Cost per year', money(c.cpy)], ['Buy price', money(c.price)], ['Years left', c.rem.toFixed(1)]]
+        .forEach(([k,v]) => {
+          const row = document.createElement('div'); row.className='tr';
+          const l = document.createElement('div'); l.className='tl'; l.textContent=k;
+          const s2 = document.createElement('span'); s2.className='tv'; s2.textContent=v;
+          row.append(l,s2); tip.appendChild(row);
+        });
+      tip.style.opacity=1;
+      tip.style.left = Math.max(4, Math.min(sx/W*bx.width+10, bx.width-tip.offsetWidth-4))+'px';
+      tip.style.top  = Math.max(4, sy/H*bx.height-70)+'px';
+    });
+    ov.addEventListener('pointerleave', () => tip.style.opacity=0);
+
+    cell.appendChild(svg); cell.appendChild(tip);
+    const b = document.createElement('div'); b.className='best';
+    const strong = document.createElement('strong');
+    strong.textContent = `${best.age} yr · ${kmFmt(best.km)} · ${money(best.cpy)}/yr`;
+    b.append(document.createTextNode('Cheapest: '), strong,
+             document.createTextNode(` — pay ${money(best.price)}, keep it ${best.rem.toFixed(1)} more years`));
+    cell.appendChild(b);
+    host.appendChild(cell);
+  });
+
+  const bar = $('#rampBar');
+  if(!bar.childElementCount) RAMP.slice().reverse().forEach(c => { const s2=document.createElement('span'); s2.style.background=c; bar.appendChild(s2); });
+}
+
+['ssKm','ssBase','ssRate','ssLife'].forEach((id,i) => {
+  const key = ['ann','base','rate','life'][i];
+  const inp = document.getElementById(id);
+  inp.value = ss[key];
+  inp.addEventListener('input', e => { ss[key] = +e.target.value; renderSweet(); });
+});
+
+$('#dwProv').textContent =
+  `Drivetrain and colour are not fields AutoTrader publishes. Drivetrain is read from the trim line and the dealer's own description `
+  + `(${meta.drivetrain_stated.toLocaleString('en-CA')} listings say so outright) and filled in from published specification where a model leaves no choice `
+  + `(${meta.drivetrain_spec.toLocaleString('en-CA')} listings: every Outback and Forester sold here is symmetrical AWD, and Toyota and Honda make AWD standard on their `
+  + `electrified compact SUVs in Canada); ${meta.drivetrain_unknown.toLocaleString('en-CA')} stay unresolved and are kept as their own category rather than guessed. `
+  + `Colour is read from the listing URL. Engine displacement is absent from the feed — fewer than one listing in fifteen states it — and is not modelled here; `
+  + `within these five it is very nearly fixed by model, year and powertrain, all of which the model already carries.`;
+
+renderModelSection();
+renderPredictor();
+renderEffects();
+renderSweet();
+
+</script>
